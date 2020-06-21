@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const PostingSchema = Schema({
-  _id: Schema.Types.ObjectId,
   title: {
     type: String,
     required: true,
@@ -10,19 +9,32 @@ const PostingSchema = Schema({
     type: Date,
     default: Date.now,
   },
-  description: String,
-  category: String,
-  condition: String,
-  quantity: Number,
-  tags: [String],
-  requestedItem: [String],
-  imgSrc: {
-    data: Buffer,
-    contentType: String,
+  description: {
+    type: String,
+    required: true,
   },
-  ownerId: Number,
-  postalCode: String,
-  offerings: [],
+  category: {
+    type: String,
+    required: true,
+  },
+  condition: {
+    type: String,
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    default: 1,
+  },
+  tags: [String],
+  requestedItems: [String],
+  // imgSrc: {
+  //   data: Buffer,
+  //   contentType: String,
+  // },
+  ownerId: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("Posting", PostingSchema);

@@ -6,6 +6,8 @@ const mongooese = require("mongoose");
 
 const bodyParser = require("body-parser");
 
+var cors = require("cors");
+
 require("dotenv/config");
 
 // Middlewares - A mechanism to run a function when an endpoint is hit
@@ -17,7 +19,8 @@ require("dotenv/config");
 const postsRoute = require("./routes/postings");
 const usersRoute = require("./routes/users");
 
-app.use(bodyParser.json);
+app.use(cors());
+app.use(bodyParser.json());
 app.use("/postings", postsRoute);
 app.use("/users", usersRoute);
 // Routes
