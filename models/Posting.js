@@ -25,7 +25,9 @@ const PostingSchema = Schema({
     type: Number,
     default: 1,
   },
-  tags: [String],
+  tags: {
+    type: [String],
+  },
   requestedItems: [String],
   // imgSrc: {
   //   data: Buffer,

@@ -3,7 +3,10 @@ const User = require("../models/User");
 
 const router = express.Router();
 
-// http://localhost/users ///////////////////////////////////////////////////////
+const SecurityUtil = require("../utils/securityUtil");
+const { route } = require("./postings");
+
+// http://localhost/api/users ///////////////////////////////////////////////////////
 // GET
 // Returns all users
 router.get("/", async (req, res) => {
@@ -21,25 +24,83 @@ router.get("/", async (req, res) => {
 // Creates user based on input parameters
 router.post("/", async (req, res) => {
   const reqBody = req.body;
-  const user = new User({
-    userName: reqBody.userName,
-    email: reqBody.email,
-    password: reqBody.password,
-    postalCode: reqBody.postalCode,
-    dateRegistered: reqBody.dateRegistered,
-  });
 
   try {
-    const savedUser = await user.save();
-    res.status(201).json(savedUser);
+    let user = await User.findOne({
+      email: reqBody.email,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
   }
+
+  if (user) {
+    res.status(400).json({
+      message: "This email has already been registered.",
+    });
+  } else {
+    const user = new User({
+      userName: reqBody.userName,
+      email: reqBody.email,
+      // password: reqBody.password,
+      postalCode: reqBody.postalCode,
+      dateRegistered: reqBody.dateRegistered,
+    });
+
+    try {
+      user.password = await SecurityUtil.hashPassword(reqBody.password);
+
+      const savedUser = await user.save();
+      res.status(201).json(savedUser);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "Error code 500: Failed to process request",
+      });
+    }
+  }
 });
-// http://localhost/users/{userId} ////////////////////////////////////////////
+
+// POST
+// Authenticate user
+router.post("/authenticate", async (req, res) => {
+  const reqBody = req.body;
+  let user = null;
+  try {
+    user = await User.findOne({
+      email: reqBody.email,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+
+  if (!user) {
+    res.status(404).json({
+      message: "User does not exist.",
+    });
+  }
+
+  const authenticated = await SecurityUtil.authenticateUser(
+    reqBody.password,
+    user.password
+  );
+
+  if (!authenticated) {
+    res.status(400).json({
+      message: "Incorrect user credentials.",
+    });
+    return;
+  }
+
+  res.status(200).json(user);
+});
+
+// http://localhost/api/users/{userId} ////////////////////////////////////////////
 // GET
 router.get("/:userId", async (req, res) => {
   try {

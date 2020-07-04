@@ -1,7 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const Posting = require("../models/Posting");
-const { route } = require("./users");
+const StringUtil = require("../utils/stringUtil");
+const { schema } = require("../models/Posting");
+
+schema.index({
+  title: "text",
+  description: "text",
+  category: "text",
+  condition: "text",
+  tags: "text",
+});
 
 // http://localhost/api/postings ///////////////////////////////////////////////////////
 // GET
@@ -9,6 +18,36 @@ const { route } = require("./users");
 router.get("/", async (req, res) => {
   try {
     const postings = await Posting.find();
+    res.status(200).json(postings);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+// Experimental
+router.get("/searchByTag/:tagName", async (req, res) => {
+  try {
+    const postings = await Posting.find(
+      { $text: { $search: req.params.tagName } },
+      { score: { $meta: "textScore" } }
+    ).sort({ score: { $meta: "textScore" } });
+    res.status(200).json(postings);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+router.get("/search/:query", async (req, res) => {
+  try {
+    const postings = await Posting.find({
+      $text: { $search: req.params.query },
+    });
     res.status(200).json(postings);
   } catch (err) {
     console.log(err);

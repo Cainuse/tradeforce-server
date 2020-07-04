@@ -21,8 +21,8 @@ const usersRoute = require("./routes/users");
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use("/postings", postsRoute);
-app.use("/users", usersRoute);
+app.use("/api/postings", postsRoute);
+app.use("/api/users", usersRoute);
 // Routes
 app.get("/", (req, res) => {
   res.send("We are on home.");
