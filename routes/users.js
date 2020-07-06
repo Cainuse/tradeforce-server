@@ -24,10 +24,6 @@ const loginValidation = joi.object({
   isGoogleLogin: joi.boolean().required()
 });
 
-const authValidation = joi.object({
-  token: joi.string().required()
-});
-
 // http://localhost/api/users ///////////////////////////////////////////////////////
 // GET
 // Returns all users
@@ -118,6 +114,7 @@ router.post("/login", async (req, res) => {
       email: reqBody.email,
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -163,6 +160,7 @@ router.get("/:userId", async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -179,6 +177,7 @@ router.get("/findUser/:email", async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -191,6 +190,7 @@ router.delete("/:userId", async (req, res) => {
     const deletedUser = await User.remove({ _id: req.params.userId });
     res.status(204).send();
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -206,6 +206,7 @@ router.patch("/:userId", async (req, res) => {
     );
     res.status(200).json(updatedUser);
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
