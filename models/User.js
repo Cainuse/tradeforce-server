@@ -16,6 +16,10 @@ const UserSchema = Schema({
     type: Date,
     default: Date.now,
   },
+  isGoogleUser: {
+    type: Boolean,
+    required: true
+  }
   // profilePic: {
   //   data: Buffer,
   //   contentType: String,

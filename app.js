@@ -36,4 +36,5 @@ mongooese.connect(process.env.DB_CONNECTION, () => {
 });
 
 // Start the server
-app.listen(3000);
+app.set('port', 3001);
+app.listen(3001);

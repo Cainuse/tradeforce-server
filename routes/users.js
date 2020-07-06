@@ -1,10 +1,26 @@
 const express = require("express");
 const User = require("../models/User");
+const joi = require("@hapi/joi");
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
 const SecurityUtil = require("../utils/securityUtil");
-const { route } = require("./postings");
+
+const registerValidation = joi.object({
+  userName: joi.string().required(),
+  email: joi.string().required().email(),
+  password: joi.string().required(),
+  postalCode: joi.string(),
+  dateRegistered: joi.date(),
+  isGoogleUser: joi.boolean().required()
+});
+
+const loginValidation = joi.object({
+  email: joi.string().required().email(),
+  password: joi.string().required(),
+  isGoogleLogin: joi.boolean().required()
+});
 
 // http://localhost/api/users ///////////////////////////////////////////////////////
 // GET
@@ -25,8 +41,16 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const reqBody = req.body;
 
+  const { error } = registerValidation.validate(reqBody);
+  if (error) {
+    return res.status(400).json({
+      message: error.details[0].message
+    });
+  };
+
+  let user;
   try {
-    let user = await User.findOne({
+    user = await User.findOne({
       email: reqBody.email,
     });
   } catch (err) {
@@ -44,9 +68,9 @@ router.post("/", async (req, res) => {
     const user = new User({
       userName: reqBody.userName,
       email: reqBody.email,
-      // password: reqBody.password,
       postalCode: reqBody.postalCode,
       dateRegistered: reqBody.dateRegistered,
+      isGoogleUser: reqBody.isGoogleUser
     });
 
     try {
@@ -67,6 +91,15 @@ router.post("/", async (req, res) => {
 // Authenticate user
 router.post("/authenticate", async (req, res) => {
   const reqBody = req.body;
+  const { isGoogleLogin } = reqBody;
+
+  const { error } = loginValidation.validate(reqBody);
+  if (error) {
+    return res.status(400).json({
+      message: error.details[0].message
+    });
+  };
+
   let user = null;
   try {
     user = await User.findOne({
@@ -79,7 +112,7 @@ router.post("/authenticate", async (req, res) => {
     });
   }
 
-  if (!user) {
+  if (!user && !isGoogleLogin) {
     res.status(404).json({
       message: "User does not exist.",
     });
@@ -90,13 +123,15 @@ router.post("/authenticate", async (req, res) => {
     user.password
   );
 
-  if (!authenticated) {
+  if (!authenticated && !isGoogleLogin) {
     res.status(400).json({
       message: "Incorrect user credentials.",
     });
     return;
   }
 
+  const token = jwt.sign(user.toJSON(), process.env.TOKEN_SECRET);
+  res.header('auth-token', token);
   res.status(200).json(user);
 });
 
@@ -106,7 +141,25 @@ router.get("/:userId", async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     if (!user) {
-      res.status(404).send();
+      res.status(404).json({
+        message: "The given user id does not match any user records. Try again."
+      });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+router.get("/findUser/:email", async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.params.email });
+    if (!user) {
+      res.status(404).json({
+        message: "The given user email does not match any user records. Try again."
+      });
     }
     res.status(200).json(user);
   } catch (err) {
