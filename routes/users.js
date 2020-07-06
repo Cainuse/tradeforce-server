@@ -102,7 +102,6 @@ router.post("/", async (req, res) => {
 // Authenticate user
 router.post("/login", async (req, res) => {
   const reqBody = req.body;
-  const { isGoogleLogin } = reqBody;
 
   const { error } = loginValidation.validate(reqBody);
   if (error) {
@@ -111,13 +110,14 @@ router.post("/login", async (req, res) => {
     });
   };
 
+  const { isGoogleLogin } = reqBody;
+
   let user = null;
   try {
     user = await User.findOne({
       email: reqBody.email,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
