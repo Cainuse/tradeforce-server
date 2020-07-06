@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 const SecurityUtil = require("../utils/securityUtil");
+const validateToken = require("../middleware/validateToken");
+const { valid } = require("@hapi/joi");
 
 const registerValidation = joi.object({
   userName: joi.string().required(),
@@ -20,6 +22,10 @@ const loginValidation = joi.object({
   email: joi.string().required().email(),
   password: joi.string().required(),
   isGoogleLogin: joi.boolean().required()
+});
+
+const authValidation = joi.object({
+  token: joi.string().required()
 });
 
 // http://localhost/api/users ///////////////////////////////////////////////////////
@@ -77,7 +83,12 @@ router.post("/", async (req, res) => {
       user.password = await SecurityUtil.hashPassword(reqBody.password);
 
       const savedUser = await user.save();
-      res.status(201).json(savedUser);
+      const token = jwt.sign(user.toJSON(), process.env.TOKEN_SECRET);
+      res.header('auth-token', token);
+      res.status(201).json({
+        user: savedUser,
+        token
+      });
     } catch (err) {
       console.log(err);
       res.status(500).json({
@@ -89,7 +100,7 @@ router.post("/", async (req, res) => {
 
 // POST
 // Authenticate user
-router.post("/authenticate", async (req, res) => {
+router.post("/login", async (req, res) => {
   const reqBody = req.body;
   const { isGoogleLogin } = reqBody;
 
@@ -132,8 +143,13 @@ router.post("/authenticate", async (req, res) => {
 
   const token = jwt.sign(user.toJSON(), process.env.TOKEN_SECRET);
   res.header('auth-token', token);
-  res.status(200).json(user);
+  res.status(200).json({
+    user,
+    token
+  });
 });
+
+router.post("/authenticate", validateToken);
 
 // http://localhost/api/users/{userId} ////////////////////////////////////////////
 // GET
