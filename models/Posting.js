@@ -39,4 +39,14 @@ const PostingSchema = Schema({
   },
 });
 
-module.exports = mongoose.model("Posting", PostingSchema);
+PostingSchema.index({
+  title: "text",
+  description: "text",
+  category: "text",
+  condition: "text",
+  tags: "text",
+});
+
+let model = mongoose.model("Posting", PostingSchema);
+
+module.exports = model;

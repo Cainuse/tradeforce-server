@@ -1,16 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const Posting = require("../models/Posting");
-const StringUtil = require("../utils/stringUtil");
-const { schema } = require("../models/Posting");
-
-schema.index({
-  title: "text",
-  description: "text",
-  category: "text",
-  condition: "text",
-  tags: "text",
-});
 
 // http://localhost/api/postings ///////////////////////////////////////////////////////
 // GET
@@ -27,11 +17,16 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Experimental
-router.get("/searchByTag/:tagName", async (req, res) => {
+// GET
+// Returns all postings whose fields contain search query
+router.get("/search/:query", async (req, res) => {
   try {
     const postings = await Posting.find(
-      { $text: { $search: req.params.tagName } },
+      {
+        $text: {
+          $search: req.params.query,
+        },
+      },
       { score: { $meta: "textScore" } }
     ).sort({ score: { $meta: "textScore" } });
     res.status(200).json(postings);
@@ -43,19 +38,6 @@ router.get("/searchByTag/:tagName", async (req, res) => {
   }
 });
 
-router.get("/search/:query", async (req, res) => {
-  try {
-    const postings = await Posting.find({
-      $text: { $search: req.params.query },
-    });
-    res.status(200).json(postings);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: "Error code 500: Failed to process request",
-    });
-  }
-});
 // POST
 // Creates new posting based on input parameters
 router.post("/", async (req, res) => {
@@ -125,4 +107,23 @@ router.patch("/:postingId", async (req, res) => {
     });
   }
 });
+
+// Internal use only!
+router.get("/showIndex", async (req, res) => {
+  try {
+    Posting.collection
+      .getIndexes({ full: true })
+      .then((indexes) => {
+        console.log("indexes:", indexes);
+        // ...
+      })
+      .catch(console.error);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
 module.exports = router;
