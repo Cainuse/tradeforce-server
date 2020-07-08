@@ -50,6 +50,6 @@ PostingSchema.index({
   tags: "text",
 });
 
-let model = mongoose.model("Postings", PostingSchema);
+let model = mongoose.model("Posting", PostingSchema);
 
 module.exports = model;
