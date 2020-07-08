@@ -35,7 +35,11 @@ const PostingSchema = Schema({
     required: true,
   },
   ownerUsername: String, 
-  location: String
+  location: String,
+  active: {
+    type: Boolean,
+    default: true
+  }
 });
 
 PostingSchema.index({
