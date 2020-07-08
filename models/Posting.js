@@ -29,14 +29,13 @@ const PostingSchema = Schema({
     type: [String],
   },
   requestedItems: [String],
-  // imgSrc: {
-  //   data: Buffer,
-  //   contentType: String,
-  // },
+  images: [String],
   ownerId: {
     type: String,
     required: true,
   },
+  ownerUsername: String, 
+  location: String
 });
 
 PostingSchema.index({
@@ -47,6 +46,6 @@ PostingSchema.index({
   tags: "text",
 });
 
-let model = mongoose.model("Posting", PostingSchema);
+let model = mongoose.model("Postings", PostingSchema);
 
 module.exports = model;
