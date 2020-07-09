@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 // const validateToken = require('../middleware/validateToken');
 const Posting = require("../models/Posting");
+const Offering = require("../models/Offering");
 
 // http://localhost/api/postings ///////////////////////////////////////////////////////
 // GET
@@ -104,6 +105,47 @@ router.patch("/:postingId", async (req, res) => {
       { $set: req.body }
     );
     res.status(200).json(updatedPosting);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+// http://localhost/api/postings/{postingId}/offerings ////////////////////////////////////////////
+// GET
+// Fetch all offerings of given posting
+router.get("/:postingId/offerings", async (req, res) => {
+  try {
+    const offeringsOfPosting = await Offering.find({
+      postingId: req.params.postingId,
+    });
+    res.status(200).json(offeringsOfPosting);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+// POST
+// Create new offering for posting
+router.post("/:postingId/offerings", async (req, res) => {
+  const reqBody = req.body;
+  const offering = new Offering({
+    comment: reqBody.comment,
+    date: reqBody.date,
+    itemTitle: reqBody.itemTitle,
+    itemCondition: reqBody.itemCondition,
+    itemDescription: reqBody.itemDescription,
+    userId: reqBody.userId,
+    postingId: req.params.postingId,
+    isActive: true,
+  });
+
+  try {
+    const savedOffering = await offering.save();
+    res.status(201).json(savedOffering);
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",

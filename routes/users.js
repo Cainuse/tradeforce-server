@@ -1,8 +1,8 @@
 const express = require("express");
 const User = require("../models/User");
 const joi = require("@hapi/joi");
-const jwt = require('jsonwebtoken');
-
+const jwt = require("jsonwebtoken");
+const Offering = require("../models/Offering");
 const router = express.Router();
 
 const SecurityUtil = require("../utils/securityUtil");
@@ -15,13 +15,13 @@ const registerValidation = joi.object({
   password: joi.string().required(),
   postalCode: joi.string(),
   dateRegistered: joi.date(),
-  isGoogleUser: joi.boolean().required()
+  isGoogleUser: joi.boolean().required(),
 });
 
 const loginValidation = joi.object({
   email: joi.string().required().email(),
   password: joi.string().required(),
-  isGoogleLogin: joi.boolean().required()
+  isGoogleLogin: joi.boolean().required(),
 });
 
 // http://localhost/api/users ///////////////////////////////////////////////////////
@@ -46,9 +46,9 @@ router.post("/", async (req, res) => {
   const { error } = registerValidation.validate(reqBody);
   if (error) {
     return res.status(400).json({
-      message: error.details[0].message
+      message: error.details[0].message,
     });
-  };
+  }
 
   let user;
   try {
@@ -72,7 +72,7 @@ router.post("/", async (req, res) => {
       email: reqBody.email,
       postalCode: reqBody.postalCode,
       dateRegistered: reqBody.dateRegistered,
-      isGoogleUser: reqBody.isGoogleUser
+      isGoogleUser: reqBody.isGoogleUser,
     });
 
     try {
@@ -80,10 +80,10 @@ router.post("/", async (req, res) => {
 
       const savedUser = await user.save();
       const token = jwt.sign(user.toJSON(), process.env.TOKEN_SECRET);
-      res.header('auth-token', token);
+      res.header("auth-token", token);
       res.status(201).json({
         user: savedUser,
-        token
+        token,
       });
     } catch (err) {
       console.log(err);
@@ -102,9 +102,9 @@ router.post("/login", async (req, res) => {
   const { error } = loginValidation.validate(reqBody);
   if (error) {
     return res.status(400).json({
-      message: error.details[0].message
+      message: error.details[0].message,
     });
-  };
+  }
 
   const { isGoogleLogin } = reqBody;
 
@@ -139,10 +139,10 @@ router.post("/login", async (req, res) => {
   }
 
   const token = jwt.sign(user.toJSON(), process.env.TOKEN_SECRET);
-  res.header('auth-token', token);
+  res.header("auth-token", token);
   res.status(200).json({
     user,
-    token
+    token,
   });
 });
 
@@ -155,7 +155,8 @@ router.get("/:userId", async (req, res) => {
     const user = await User.findById(req.params.userId);
     if (!user) {
       res.status(404).json({
-        message: "The given user id does not match any user records. Try again."
+        message:
+          "The given user id does not match any user records. Try again.",
       });
     }
     res.status(200).json(user);
@@ -167,12 +168,57 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
+// http://localhost/api/users/{userId}/offerings/ ////////////////////////////////////////////
+// Get all offerings that a user has made
+router.get("/:userId/offerings", async (req, res) => {
+  try {
+    const offeringsOfUser = await Offering.find({
+      userId: req.params.userId,
+    });
+
+    res.status(200).json(offeringsOfUser);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+router.get("/:userId/offerings/active", async (req, res) => {
+  try {
+    const offeringsOfUser = await Offering.find({
+      userId: req.params.userId,
+      isActive: true,
+    });
+    res.status(200).json(offeringsOfUser);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+router.get("/:userId/offerings/inactive", async (req, res) => {
+  try {
+    const offeringsOfUser = await Offering.find({
+      userId: req.params.userId,
+      isActive: false,
+    });
+    res.status(200).json(offeringsOfUser);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
 router.get("/findUser/:email", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.params.email });
     if (!user) {
       res.status(404).json({
-        message: "The given user email does not match any user records. Try again."
+        message:
+          "The given user email does not match any user records. Try again.",
       });
     }
     res.status(200).json(user);
