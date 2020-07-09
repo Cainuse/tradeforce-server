@@ -55,7 +55,6 @@ router.post("/", async (req, res) => {
     requestedItems: reqBody.requestedItems,
     images: reqBody.images,
     ownerId: reqBody.ownerId,
-    ownerUsername: reqBody.ownerUsername,
     location: reqBody.location
   });
 

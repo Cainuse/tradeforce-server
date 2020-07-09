@@ -34,7 +34,6 @@ const PostingSchema = Schema({
     type: String,
     required: true,
   },
-  ownerUsername: String, 
   location: String,
   active: {
     type: Boolean,
