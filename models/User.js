@@ -13,7 +13,11 @@ const UserSchema = Schema({
     required: true,
   },
   password: String,
-  postalCode: String,
+  // postalCode: String,
+  location: {
+    type: String,
+    default: "Vancouver, BC"
+  },
   dateRegistered: {
     type: Date,
     default: Date.now,
