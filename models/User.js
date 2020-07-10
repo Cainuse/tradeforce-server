@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const ReviewSchema = Schema({title: String, review: String, rating: Number, reviewUsername: String})
+const ReviewSchema = Schema({
+  title: String,
+  review: String,
+  rating: Number,
+  reviewUsername: String,
+});
 
 const UserSchema = Schema({
   userName: {
@@ -16,7 +21,7 @@ const UserSchema = Schema({
   // postalCode: String,
   location: {
     type: String,
-    default: "Vancouver, BC"
+    default: "Vancouver, BC",
   },
   dateRegistered: {
     type: Date,
@@ -24,16 +29,16 @@ const UserSchema = Schema({
   },
   isGoogleUser: {
     type: Boolean,
-    required: true
+    required: true,
   },
   profilePic: {
     type: String,
-    default: ""
+    default: "",
   },
   reviews: {
     type: [ReviewSchema],
-    default: []
-  }
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("User", UserSchema);

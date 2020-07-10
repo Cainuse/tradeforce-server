@@ -37,8 +37,8 @@ const PostingSchema = Schema({
   location: String,
   active: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 });
 
 PostingSchema.index({

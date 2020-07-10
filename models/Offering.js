@@ -1,5 +1,29 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+
+const Item = Schema({
+  category: {
+    type: String,
+  },
+  condition: {
+    type: String,
+  },
+  description: {
+    type: String,
+  },
+  images: {
+    type: [String],
+  },
+  nameOfItem: {
+    type: String,
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    default: 1,
+  },
+});
+
 const OfferingSchema = Schema({
   comment: {
     type: String,
@@ -9,16 +33,9 @@ const OfferingSchema = Schema({
     type: Date,
     default: Date.now,
   },
-  itemTitle: {
-    type: String,
-    required: true,
-  },
-  itemCondition: {
-    type: String,
-    required: true,
-  },
-  itemDescription: {
-    type: String,
+  offeredItems: {
+    type: [Item],
+    default: [],
   },
   userId: {
     type: String,
@@ -28,8 +45,8 @@ const OfferingSchema = Schema({
     type: String,
     required: true,
   },
-  isActive: {
-    type: Boolean,
+  status: {
+    type: String,
     required: true,
   },
 });
