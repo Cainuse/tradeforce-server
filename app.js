@@ -2,7 +2,7 @@ const express = require("express");
 
 const app = express();
 
-const mongooese = require("mongoose");
+const mongoose = require("mongoose");
 
 const bodyParser = require("body-parser");
 
@@ -25,15 +25,17 @@ app.use("/api/postings", postsRoute);
 app.use("/api/users", usersRoute);
 // Routes
 app.get("/", (req, res) => {
-  res.send("We are on home.");
+    res.send("We are on home.");
 });
 
 // Connect to DB
 // User: testUser
 // Pass: test123
-mongooese.connect(process.env.DB_CONNECTION, () => {
-  console.log("Connected to DB!");
-});
+mongoose.connect(process.env.DB_CONNECTION,
+    {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true},
+    () => {
+        console.log("Connected to DB!");
+    });
 
 // Start the server
 app.set('port', 3001);
