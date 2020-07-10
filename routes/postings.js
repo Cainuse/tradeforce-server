@@ -26,20 +26,19 @@ router.get("/search/:query", async (req, res) => {
     let queryParams = {};
     let params = new URLSearchParams(req.params.query);
     params.forEach((value, key) => {
-      if(key === "category") {
-        if(value !== "all") {
-          queryParams[key] = value
+      if (key === "category") {
+        if (value !== "all") {
+          queryParams[key] = value;
         }
       } else if (key === "search") {
-        queryParams["$text"] = {$search: value}
+        queryParams["$text"] = { $search: value };
       } else {
-        queryParams[key] = value
+        queryParams[key] = value;
       }
     });
-    const postings = await Posting.find(
-      queryParams,
-      { score: { $meta: "textScore" } }
-    ).sort({ score: { $meta: "textScore" } });
+    const postings = await Posting.find(queryParams, {
+      score: { $meta: "textScore" },
+    }).sort({ score: { $meta: "textScore" } });
     res.status(200).json(postings);
   } catch (err) {
     console.log(err);
@@ -64,7 +63,7 @@ router.post("/", async (req, res) => {
     requestedItems: reqBody.requestedItems,
     images: reqBody.images,
     ownerId: reqBody.ownerId,
-    location: reqBody.location
+    location: reqBody.location,
   });
 
   try {
@@ -143,12 +142,10 @@ router.post("/:postingId/offerings", async (req, res) => {
   const offering = new Offering({
     comment: reqBody.comment,
     date: reqBody.date,
-    itemTitle: reqBody.itemTitle,
-    itemCondition: reqBody.itemCondition,
-    itemDescription: reqBody.itemDescription,
+    offeredItems: reqBody.offeredItems,
     userId: reqBody.userId,
     postingId: req.params.postingId,
-    isActive: true,
+    status: reqBody.status,
   });
 
   try {

@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const ReviewSchema = Schema({title: String, review: String, rating: Number, reviewUsername: String})
+const ReviewSchema = Schema({
+  title: String,
+  review: String,
+  rating: Number,
+  reviewUsername: String,
+});
 
 const UserSchema = Schema({
   firstName: {
@@ -38,16 +43,16 @@ const UserSchema = Schema({
   },
   isGoogleUser: {
     type: Boolean,
-    required: true
+    required: true,
   },
   profilePic: {
     type: String,
-    default: ""
+    default: "",
   },
   reviews: {
     type: [ReviewSchema],
-    default: []
-  }
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("User", UserSchema);

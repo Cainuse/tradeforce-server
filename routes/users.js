@@ -191,7 +191,7 @@ router.get("/:userId/offerings/active", async (req, res) => {
   try {
     const offeringsOfUser = await Offering.find({
       userId: req.params.userId,
-      isActive: true,
+      status: "PENDING",
     });
     res.status(200).json(offeringsOfUser);
   } catch (err) {
@@ -205,7 +205,7 @@ router.get("/:userId/offerings/inactive", async (req, res) => {
   try {
     const offeringsOfUser = await Offering.find({
       userId: req.params.userId,
-      isActive: false,
+      status: { $not: "PENDING" },
     });
     res.status(200).json(offeringsOfUser);
   } catch (err) {
