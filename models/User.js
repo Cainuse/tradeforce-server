@@ -19,11 +19,12 @@ const UserSchema = Schema({
   isGoogleUser: {
     type: Boolean,
     required: true
-  }
-  // profilePic: {
-  //   data: Buffer,
-  //   contentType: String,
-  // },
+  },
+  profilePic: {
+    type: String,
+    default: ""
+  },
+  reviews: [{title: String, review: String, rating: Number}]
 });
 
 module.exports = mongoose.model("User", UserSchema);
