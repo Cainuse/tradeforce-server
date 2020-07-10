@@ -23,12 +23,21 @@ router.get("/", async (req, res) => {
 // Returns all postings whose fields contain search query
 router.get("/search/:query", async (req, res) => {
   try {
+    let queryParams = {};
+    let params = new URLSearchParams(req.params.query);
+    params.forEach((value, key) => {
+      if(key === "category") {
+        if(value !== "all") {
+          queryParams[key] = value
+        }
+      } else if (key === "search") {
+        queryParams["$text"] = {$search: value}
+      } else {
+        queryParams[key] = value
+      }
+    });
     const postings = await Posting.find(
-      {
-        $text: {
-          $search: req.params.query,
-        },
-      },
+      queryParams,
       { score: { $meta: "textScore" } }
     ).sort({ score: { $meta: "textScore" } });
     res.status(200).json(postings);
