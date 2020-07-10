@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const ReviewSchema = Schema({title: String, review: String, rating: Number, reviewUsername: String})
+
 const UserSchema = Schema({
   firstName: {
     type: String,
@@ -38,8 +40,14 @@ const UserSchema = Schema({
     type: Boolean,
     required: true
   },
-  profilePic: String,
-  reviews: [{title: String, review: String, rating: Number}]
+  profilePic: {
+    type: String,
+    default: ""
+  },
+  reviews: {
+    type: [ReviewSchema],
+    default: []
+  }
 });
 
 module.exports = mongoose.model("User", UserSchema);

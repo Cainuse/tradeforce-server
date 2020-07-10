@@ -29,14 +29,16 @@ const PostingSchema = Schema({
     type: [String],
   },
   requestedItems: [String],
-  // imgSrc: {
-  //   data: Buffer,
-  //   contentType: String,
-  // },
+  images: [String],
   ownerId: {
     type: String,
     required: true,
   },
+  location: String,
+  active: {
+    type: Boolean,
+    default: true
+  }
 });
 
 PostingSchema.index({
