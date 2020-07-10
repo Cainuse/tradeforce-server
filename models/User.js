@@ -4,6 +4,14 @@ const Schema = mongoose.Schema;
 const ReviewSchema = Schema({title: String, review: String, rating: Number, reviewUsername: String})
 
 const UserSchema = Schema({
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  }, 
   userName: {
     type: String,
     required: true,
@@ -12,11 +20,17 @@ const UserSchema = Schema({
     type: String,
     required: true,
   },
-  password: String,
-  // postalCode: String,
+  password: {
+    type: String,
+    required: true,
+  },
+  postalCode: {
+    type: String,
+    default: "V7Y 1G5", // pacific center postal code
+  },
   location: {
     type: String,
-    default: "Vancouver, BC"
+    default: "Vancouver, BC",
   },
   dateRegistered: {
     type: Date,
