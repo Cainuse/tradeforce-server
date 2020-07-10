@@ -26,7 +26,10 @@ const UserSchema = Schema({
     type: String,
     default: ""
   },
-  reviews: [ReviewSchema]
+  reviews: {
+    type: [ReviewSchema],
+    default: []
+  }
 });
 
 module.exports = mongoose.model("User", UserSchema);
