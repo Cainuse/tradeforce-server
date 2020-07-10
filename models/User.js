@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const ReviewSchema = Schema({title: String, review: String, rating: Number})
+
 const UserSchema = Schema({
   userName: {
     type: String,
@@ -24,7 +26,7 @@ const UserSchema = Schema({
     type: String,
     default: ""
   },
-  reviews: [{title: String, review: String, rating: Number}]
+  reviews: [ReviewSchema]
 });
 
 module.exports = mongoose.model("User", UserSchema);
