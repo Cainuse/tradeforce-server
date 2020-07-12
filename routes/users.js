@@ -3,6 +3,7 @@ const User = require("../models/User");
 const joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
 const Offering = require("../models/Offering");
+const Posting = require("../models/Posting");
 const router = express.Router();
 
 const SecurityUtil = require("../utils/securityUtil");
@@ -215,6 +216,52 @@ router.get("/:userId/offerings/inactive", async (req, res) => {
   }
 });
 
+// http://localhost/api/users/{userId}/postings/ ////////////////////////////////////////////
+// Get all postings that a user has made
+router.get("/:userId/postings", async (req, res) => {
+  try {
+    const postingsOfUser = await Posting.find({
+      ownerId: req.params.userId,
+    });
+
+    res.status(200).json(offeringsOfUser);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+router.get("/:userId/postings/active", async (req, res) => {
+  try {
+    const postingsOfUser = await Posting.find({
+      ownerId: req.params.userId,
+      active: true,
+    });
+
+    res.status(200).json(offeringsOfUser);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+router.get("/:userId/postings/inactive", async (req, res) => {
+  try {
+    const postingsOfUser = await Posting.find({
+      ownerId: req.params.userId,
+      active: false,
+    });
+
+    res.status(200).json(offeringsOfUser);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
 router.get("/findUser/:email", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.params.email });
@@ -266,7 +313,7 @@ router.delete("/", async (req, res) => {
   try {
     await User.remove({});
     res.status(200).json({
-      message: "successfully removed all users."
+      message: "successfully removed all users.",
     });
   } catch (err) {
     console.log(err);
