@@ -4,8 +4,14 @@ const Schema = mongoose.Schema;
 const ReviewSchema = Schema({
   title: String,
   review: String,
-  rating: Number,
-  reviewUsername: String,
+  rating: {
+    type: Number,
+    required: true,
+  },
+  reviewUsername: {
+    type: String,
+    required: true,
+  },
 });
 
 const UserSchema = Schema({
@@ -16,7 +22,7 @@ const UserSchema = Schema({
   lastName: {
     type: String,
     required: true,
-  }, 
+  },
   userName: {
     type: String,
     required: true,

@@ -243,6 +243,39 @@ router.get("/:userId/offerings/queue", async (req, res) => {
   }
 });
 
+// Add review to the user with userName
+router.post("/:userName/reviews", async (req, res) => {
+  const review = new Review({
+    title: req.body.title,
+    review: req.body.review,
+    rating: req.body.rating,
+    reviewUsername: req.body.reviewUsername
+  });
+
+  try {
+    const userToUpdate = await User.find({
+      userName: req.params.userName,
+    });
+    let reviews = userToUpdate.reviews;
+  
+    reviews.push(review);
+
+    const reviewee = await User.updateOne({
+      userName: req.params.userName 
+    },
+    {
+      reviews: reviews,
+    });
+
+    res.status(201).json(reviewee);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+
+});
 
 // http://localhost/api/users/{userId}/postings/ ////////////////////////////////////////////
 // Get all postings that a user has made
