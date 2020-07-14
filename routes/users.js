@@ -345,7 +345,7 @@ router.get("/findUser/:email", async (req, res) => {
 // DELETE
 router.delete("/:userId", async (req, res) => {
   try {
-    const deletedUser = await User.remove({ _id: req.params.userId });
+    const deletedUser = await User.deleteOne({ _id: req.params.userId });
     res.status(204).send();
   } catch (err) {
     console.log(err);
@@ -373,7 +373,7 @@ router.patch("/:userId", async (req, res) => {
 
 router.delete("/", async (req, res) => {
   try {
-    await User.remove({});
+    await User.deleteMany({});
     res.status(200).json({
       message: "successfully removed all users.",
     });

@@ -18,11 +18,13 @@ require("dotenv/config");
 // Import Routes
 const postsRoute = require("./routes/postings");
 const usersRoute = require("./routes/users");
+const notificationsRoute = require("./routes/notifications");
 
 app.use(cors());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use("/api/postings", postsRoute);
 app.use("/api/users", usersRoute);
+app.use("/api/notifications", notificationsRoute);
 // Routes
 app.get("/", (req, res) => {
   res.send("We are on home.");

@@ -46,7 +46,7 @@ const UserSchema = Schema({
   },
   dateRegistered: {
     type: Date,
-    default: Date.now,
+    default: new Date(),
   },
   isGoogleUser: {
     type: Boolean,
