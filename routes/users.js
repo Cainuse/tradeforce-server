@@ -1,9 +1,10 @@
 const express = require("express");
-const User = require("../models/User");
+const User = require("../models/User").User;
 const joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
 const Offering = require("../models/Offering");
 const Posting = require("../models/Posting");
+const Review = require("../models/User").Review;
 const router = express.Router();
 
 const SecurityUtil = require("../utils/securityUtil");
@@ -216,26 +217,15 @@ router.get("/:userId/offerings/inactive", async (req, res) => {
   }
 });
 
-// Get all the offers made to active postings belonging to the user
-router.get("/:userId/offerings/queue", async (req, res) => {
-  let offerings = [];
-
+// Get all drilled down details about a postings by the user of the given userId (Use this to get all the offerings pending)
+router.get("/:userId/postings/complete", async (req, res) => {
   try {
     const postingsOfUser = await Posting.find({
       ownerId: req.params.userId,
       active: true,
-    });
+    }).populate("offerings");
 
-    postingsOfUser.forEach((posting) => {
-      const offeringsOfUser = await Offering.find({
-        postingId: posting._id,
-      })
-      offeringsOfUser.forEach((offering) => {
-        offerings.push(offering);
-      })
-    });
-
-    res.status(200).json(offerings);
+    res.status(200).json(postingsOfUser);
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
@@ -245,36 +235,47 @@ router.get("/:userId/offerings/queue", async (req, res) => {
 
 // Add review to the user with userName
 router.post("/:userName/reviews", async (req, res) => {
-  const review = new Review({
+  const review = await new Review({
     title: req.body.title,
     review: req.body.review,
     rating: req.body.rating,
-    reviewUsername: req.body.reviewUsername
-  });
+    reviewUsername: req.body.reviewUsername,
+  }).save();
 
   try {
-    const userToUpdate = await User.find({
-      userName: req.params.userName,
-    });
-    let reviews = userToUpdate.reviews;
-  
-    reviews.push(review);
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        userName: req.params.userName,
+      },
+      { $push: { reviews: review._id } },
+      { new: true }
+    );
 
-    const reviewee = await User.updateOne({
-      userName: req.params.userName 
-    },
-    {
-      reviews: reviews,
-    });
-
-    res.status(201).json(reviewee);
+    res.status(201).json(userToUpdate);
   } catch (err) {
     console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
   }
+});
 
+// Get all drilled down details about a user with userName (Use this to get Reviews)
+router.get("/:userName/complete", async (req, res) => {
+  try {
+    const userToUpdate = await User.findOne({
+      userName: req.params.userName,
+    })
+      .populate("reviews")
+      .exec();
+
+    res.status(201).json(userToUpdate);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
 });
 
 // http://localhost/api/users/{userId}/postings/ ////////////////////////////////////////////

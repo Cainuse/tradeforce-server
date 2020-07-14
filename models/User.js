@@ -26,6 +26,7 @@ const UserSchema = Schema({
   userName: {
     type: String,
     required: true,
+    unique: true,
   },
   email: {
     type: String,
@@ -56,9 +57,15 @@ const UserSchema = Schema({
     default: "",
   },
   reviews: {
-    type: [ReviewSchema],
+    type: [{ type: Schema.Types.ObjectId, ref: "Review" }],
     default: [],
   },
 });
 
-module.exports = mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
+const Review = mongoose.model("Review", ReviewSchema);
+
+module.exports = {
+  User,
+  Review,
+};
