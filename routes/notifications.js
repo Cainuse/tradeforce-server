@@ -15,22 +15,6 @@ const updateNotificationValidation = joi.object({
   isRead: joi.boolean().required(),
 });
 
-// http://localhost/api/notifications ///////////////////////////////////////////////////////
-// GET
-// Returns all notifications
-
-router.get("/", async (req, res) => {
-  try {
-    const notifications = await Notification.find();
-    res.status(200).json(notifications);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: "Error code 500: Failed to process request",
-    });
-  }
-});
-
 router.get("/findById/:notificationId", async (req, res) => {
   try {
     const notifications = await Notification.find({
@@ -85,7 +69,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.patch("/updateOneNotification/:notificationId", async (req, res) => {
+router.patch("/markAsRead/:notificationId", async (req, res) => {
   const reqBody = req.body;
 
   const { error } = updateNotificationValidation.validate(reqBody);
@@ -108,7 +92,7 @@ router.patch("/updateOneNotification/:notificationId", async (req, res) => {
   }
 });
 
-router.patch("/updateUserNotifications/:userId", async (req, res) => {
+router.patch("/markAllAsRead/:userId", async (req, res) => {
   const reqBody = req.body;
 
   const { error } = updateNotificationValidation.validate(reqBody);

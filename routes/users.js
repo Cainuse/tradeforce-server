@@ -371,18 +371,4 @@ router.patch("/:userId", async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
-  try {
-    await User.deleteMany({});
-    res.status(200).json({
-      message: "successfully removed all users.",
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: "Error code 500: Failed to process request",
-    });
-  }
-});
-
 module.exports = router;
