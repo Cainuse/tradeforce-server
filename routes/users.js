@@ -234,7 +234,7 @@ router.get("/:userId/postings/complete", async (req, res) => {
 });
 
 // Add review to the user with userName
-router.post("/:userName/reviews", async (req, res) => {
+router.post("/:userId/reviews", async (req, res) => {
   const review = await new Review({
     title: req.body.title,
     review: req.body.review,
@@ -245,7 +245,7 @@ router.post("/:userName/reviews", async (req, res) => {
   try {
     const userToUpdate = await User.findOneAndUpdate(
       {
-        userName: req.params.userName,
+        _id: req.params.userId,
       },
       { $push: { reviews: review._id } },
       { new: true }
@@ -261,10 +261,10 @@ router.post("/:userName/reviews", async (req, res) => {
 });
 
 // Get all drilled down details about a user with userName (Use this to get Reviews)
-router.get("/:userName/complete", async (req, res) => {
+router.get("/:userId/complete", async (req, res) => {
   try {
     const userToUpdate = await User.findOne({
-      userName: req.params.userName,
+      _id: req.params.userId,
     })
       .populate("reviews")
       .exec();
