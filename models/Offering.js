@@ -31,7 +31,7 @@ const OfferingSchema = Schema({
   },
   date: {
     type: Date,
-    default: Date.now,
+    default: new Date(),
   },
   offeredItems: {
     type: [Item],
