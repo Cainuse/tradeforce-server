@@ -20,23 +20,26 @@ const postsRoute = require("./routes/postings");
 const usersRoute = require("./routes/users");
 
 app.use(cors());
-app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.json({ limit: "50mb" }));
 app.use("/api/postings", postsRoute);
 app.use("/api/users", usersRoute);
 // Routes
 app.get("/", (req, res) => {
-    res.send("We are on home.");
+  res.send("We are on home.");
 });
 
+mongoose.set("useFindAndModify", false);
 // Connect to DB
 // User: testUser
 // Pass: test123
-mongoose.connect(process.env.DB_CONNECTION,
-    {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true},
-    () => {
-        console.log("Connected to DB!");
-    });
+mongoose.connect(
+  process.env.DB_CONNECTION,
+  { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
+  () => {
+    console.log("Connected to DB!");
+  }
+);
 
 // Start the server
-app.set('port', 3001);
+app.set("port", 3001);
 app.listen(3001);

@@ -139,18 +139,27 @@ router.get("/:postingId/offerings", async (req, res) => {
 // Create new offering for posting
 router.post("/:postingId/offerings", async (req, res) => {
   const reqBody = req.body;
-  const offering = new Offering({
-    comment: reqBody.comment,
-    date: reqBody.date,
-    offeredItems: reqBody.offeredItems,
-    userId: reqBody.userId,
-    postingId: req.params.postingId,
-    status: reqBody.status,
-  });
 
   try {
-    const savedOffering = await offering.save();
-    res.status(201).json(savedOffering);
+    const offering = await new Offering({
+      comment: reqBody.comment,
+      date: reqBody.date,
+      offeredItems: reqBody.offeredItems,
+      userId: reqBody.userId,
+      postingId: req.params.postingId,
+      status: reqBody.status,
+    }).save();
+
+    const postingToUpdate = await Posting.findOneAndUpdate(
+      {
+        _id: req.params.postingId,
+      },
+      { $push: { offerings: offering._id } },
+      { new: true }
+    );
+
+    console.log(postingToUpdate);
+    res.status(201).json(offering);
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",

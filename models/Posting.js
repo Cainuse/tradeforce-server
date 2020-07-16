@@ -39,6 +39,15 @@ const PostingSchema = Schema({
     type: Boolean,
     default: true,
   },
+  offerings: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Offering",
+      },
+    ],
+    default: [],
+  },
 });
 
 PostingSchema.index({

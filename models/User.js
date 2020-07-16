@@ -4,8 +4,14 @@ const Schema = mongoose.Schema;
 const ReviewSchema = Schema({
   title: String,
   review: String,
-  rating: Number,
-  reviewUsername: String,
+  rating: {
+    type: Number,
+    required: true,
+  },
+  reviewUsername: {
+    type: String,
+    required: true,
+  },
 });
 
 const UserSchema = Schema({
@@ -16,10 +22,11 @@ const UserSchema = Schema({
   lastName: {
     type: String,
     required: true,
-  }, 
+  },
   userName: {
     type: String,
     required: true,
+    unique: true,
   },
   email: {
     type: String,
@@ -50,9 +57,15 @@ const UserSchema = Schema({
     default: "",
   },
   reviews: {
-    type: [ReviewSchema],
+    type: [{ type: Schema.Types.ObjectId, ref: "Review" }],
     default: [],
   },
 });
 
-module.exports = mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
+const Review = mongoose.model("Review", ReviewSchema);
+
+module.exports = {
+  User,
+  Review,
+};
