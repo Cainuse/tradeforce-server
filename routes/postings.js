@@ -3,6 +3,8 @@ const router = express.Router();
 // const validateToken = require('../middleware/validateToken');
 const Posting = require("../models/Posting");
 const Offering = require("../models/Offering");
+const User = require("../models/User").User;
+const Notifications = require("../utils/notificationsUtil");
 
 // http://localhost/api/postings ///////////////////////////////////////////////////////
 // GET
@@ -147,7 +149,7 @@ router.post("/:postingId/offerings", async (req, res) => {
       offeredItems: reqBody.offeredItems,
       userId: reqBody.userId,
       postingId: req.params.postingId,
-      status: reqBody.status,
+      status: "PENDING",
     }).save();
 
     const postingToUpdate = await Posting.findOneAndUpdate(
@@ -158,7 +160,16 @@ router.post("/:postingId/offerings", async (req, res) => {
       { new: true }
     );
 
-    console.log(postingToUpdate);
+    const offerer = await User.findOne({
+      _id: offering.userId,
+    });
+
+    await Notifications(
+      postingToUpdate.ownerId,
+      "newOffering",
+      "Your posting has received new offering from " + offerer.userName
+    );
+
     res.status(201).json(offering);
   } catch (err) {
     res.status(500).json({

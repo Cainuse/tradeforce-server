@@ -48,6 +48,7 @@ const OfferingSchema = Schema({
   status: {
     type: String,
     required: true,
+    default: "PENDING",
   },
 });
 
