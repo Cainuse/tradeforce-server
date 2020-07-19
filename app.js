@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 
 const bodyParser = require("body-parser");
 
+const PORT = process.env.PORT || 5000;
+
 var cors = require("cors");
 
 require("dotenv/config");
@@ -30,7 +32,7 @@ app.use("/api/offerings", offeringsRoute);
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("We are on home.");
+  res.send("REST API for Tradeforce");
 });
 
 mongoose.set("useFindAndModify", false);
@@ -45,6 +47,6 @@ mongoose.connect(
   }
 );
 
-// Start the server
-app.set("port", 3001);
-app.listen(3001);
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}.`);
+});

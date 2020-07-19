@@ -27,7 +27,6 @@ const Item = Schema({
 const OfferingSchema = Schema({
   comment: {
     type: String,
-    required: true,
   },
   date: {
     type: Date,
