@@ -6,11 +6,11 @@ const mongoose = require("mongoose");
 
 const bodyParser = require("body-parser");
 
-const PORT = process.env.PORT || 5000;
-
 var cors = require("cors");
 
 require("dotenv/config");
+
+const PORT = process.env.PORT || 5000;
 
 // Middlewares - A mechanism to run a function when an endpoint is hit
 
