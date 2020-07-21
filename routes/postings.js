@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
 // Returns all postings whose fields contain search query
 router.get("/search/:query", async (req, res) => {
   try {
-    let queryParams = {};
+    let queryParams = {active: true};
     let params = new URLSearchParams(req.params.query);
     params.forEach((value, key) => {
       if (key === "category") {
@@ -40,7 +40,7 @@ router.get("/search/:query", async (req, res) => {
     });
     const postings = await Posting.find(queryParams, {
       score: { $meta: "textScore" },
-    }).sort({ score: { $meta: "textScore" } });
+    }).sort({ date: "desc", score: {$meta: "textScore"} });
     res.status(200).json(postings);
   } catch (err) {
     console.log(err);
