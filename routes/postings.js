@@ -41,7 +41,15 @@ router.get("/search/:query", async (req, res) => {
     const postings = await Posting.find(queryParams, {
       score: { $meta: "textScore" },
     }).sort({ date: "desc", score: {$meta: "textScore"} });
-    res.status(200).json(postings);
+    const postingPreviews = postings.map((post) => (
+      { _id: post._id,    
+        date: post.date,
+        title: post.title,
+        location: post.location,
+        images: post.images[0]}
+    ));
+    res.status(200).json(postingPreviews);
+    // res.status(200).json(postings);
   } catch (err) {
     console.log(err);
     res.status(500).json({
