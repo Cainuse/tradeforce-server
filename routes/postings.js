@@ -22,6 +22,27 @@ router.get("/", async (req, res) => {
 });
 
 // GET
+// returns all active postings
+router.get("/active", async (req, res) => {
+  try {
+    const postings = await Posting.find({active:true}).sort({ date: "desc"});
+    const postingPreviews = postings.map((post) => (
+      { _id: post._id,    
+        date: post.date,
+        title: post.title,
+        location: post.location,
+        images: [post.images[0]]}
+    ));
+    res.status(200).json(postingPreviews);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+// GET
 // Returns all postings whose fields contain search query
 router.get("/search/:query", async (req, res) => {
   try {
@@ -46,10 +67,9 @@ router.get("/search/:query", async (req, res) => {
         date: post.date,
         title: post.title,
         location: post.location,
-        images: post.images[0]}
+        images: [post.images[0]]}
     ));
     res.status(200).json(postingPreviews);
-    // res.status(200).json(postings);
   } catch (err) {
     console.log(err);
     res.status(500).json({
