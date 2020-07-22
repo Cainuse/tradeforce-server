@@ -229,7 +229,7 @@ router.get("/:userId/postings/complete", async (req, res) => {
         date: post.date,
         title: post.title,
         location: post.location,
-        images: post.images[0],
+        images: [post.images[0]],
       offerings: post.offerings}
     ));
     res.status(200).json(postingPreviews);
@@ -314,7 +314,7 @@ router.get("/:userId/postings/active", async (req, res) => {
         date: post.date,
         title: post.title,
         location: post.location,
-        images: post.images[0]}
+        images: [post.images[0]]}
     ));
     res.status(200).json(postingPreviews);
 
@@ -337,7 +337,7 @@ router.get("/:userId/postings/inactive", async (req, res) => {
         date: post.date,
         title: post.title,
         location: post.location,
-        images: post.images[0]}
+        images: [post.images[0]]}
     ));
     res.status(200).json(postingPreviews);
 
