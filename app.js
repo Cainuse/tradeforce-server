@@ -2,6 +2,8 @@ const express = require("express");
 
 const app = express();
 
+const http = require('http');
+
 const mongoose = require("mongoose");
 
 const bodyParser = require("body-parser");
@@ -47,6 +49,8 @@ mongoose.connect(
   }
 );
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+
+server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}.`);
 });
