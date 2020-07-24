@@ -12,7 +12,7 @@ const validateToken = require("../middleware/validateToken");
 
 const registerValidation = joi.object({
   firstName: joi.string().required(),
-  lastName: joi.string().required(),
+  lastName: joi.string(),
   userName: joi.string().required(),
   email: joi.string().required().email(),
   password: joi.string().required(),
