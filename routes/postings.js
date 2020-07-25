@@ -22,10 +22,31 @@ router.get("/", async (req, res) => {
 });
 
 // GET
+// returns all active postings
+router.get("/active", async (req, res) => {
+  try {
+    const postings = await Posting.find({active:true}).sort({ date: "desc"});
+    const postingPreviews = postings.map((post) => (
+      { _id: post._id,    
+        date: post.date,
+        title: post.title,
+        location: post.location,
+        images: [post.images[0]]}
+    ));
+    res.status(200).json(postingPreviews);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+// GET
 // Returns all postings whose fields contain search query
 router.get("/search/:query", async (req, res) => {
   try {
-    let queryParams = {};
+    let queryParams = {active: true};
     let params = new URLSearchParams(req.params.query);
     params.forEach((value, key) => {
       if (key === "category") {
@@ -40,8 +61,15 @@ router.get("/search/:query", async (req, res) => {
     });
     const postings = await Posting.find(queryParams, {
       score: { $meta: "textScore" },
-    }).sort({ score: { $meta: "textScore" } });
-    res.status(200).json(postings);
+    }).sort({ date: "desc", score: {$meta: "textScore"} });
+    const postingPreviews = postings.map((post) => (
+      { _id: post._id,    
+        date: post.date,
+        title: post.title,
+        location: post.location,
+        images: [post.images[0]]}
+    ));
+    res.status(200).json(postingPreviews);
   } catch (err) {
     console.log(err);
     res.status(500).json({

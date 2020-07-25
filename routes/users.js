@@ -12,7 +12,7 @@ const validateToken = require("../middleware/validateToken");
 
 const registerValidation = joi.object({
   firstName: joi.string().required(),
-  lastName: joi.string().required(),
+  lastName: joi.string(),
   userName: joi.string().required(),
   email: joi.string().required().email(),
   password: joi.string().required(),
@@ -224,8 +224,17 @@ router.get("/:userId/postings/complete", async (req, res) => {
       ownerId: req.params.userId,
       active: true,
     }).populate("offerings");
+    const postingPreviews = postingsOfUser.map((post) => (
+      { _id: post._id,    
+        date: post.date,
+        title: post.title,
+        location: post.location,
+        images: [post.images[0]],
+      offerings: post.offerings}
+    ));
+    res.status(200).json(postingPreviews);
 
-    res.status(200).json(postingsOfUser);
+    // res.status(200).json(postingsOfUser);
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
@@ -299,9 +308,17 @@ router.get("/:userId/postings/active", async (req, res) => {
     const postingsOfUser = await Posting.find({
       ownerId: req.params.userId,
       active: true,
-    });
+    });    
+    const postingPreviews = postingsOfUser.map((post) => (
+      { _id: post._id,    
+        date: post.date,
+        title: post.title,
+        location: post.location,
+        images: [post.images[0]]}
+    ));
+    res.status(200).json(postingPreviews);
 
-    res.status(200).json(postingsOfUser);
+    // res.status(200).json(postingsOfUser);
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
@@ -315,8 +332,16 @@ router.get("/:userId/postings/inactive", async (req, res) => {
       ownerId: req.params.userId,
       active: false,
     });
+    const postingPreviews = postingsOfUser.map((post) => (
+      { _id: post._id,    
+        date: post.date,
+        title: post.title,
+        location: post.location,
+        images: [post.images[0]]}
+    ));
+    res.status(200).json(postingPreviews);
 
-    res.status(200).json(postingsOfUser);
+    // res.status(200).json(postingsOfUser);
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
