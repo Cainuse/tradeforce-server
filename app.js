@@ -2,7 +2,9 @@ const express = require("express");
 
 const app = express();
 
-const http = require('http');
+const http = require("http");
+
+const socketio = require("socket.io");
 
 const mongoose = require("mongoose");
 
@@ -24,6 +26,8 @@ const postsRoute = require("./routes/postings");
 const usersRoute = require("./routes/users");
 const offeringsRoute = require("./routes/offerings");
 const notificationsRoute = require("./routes/notifications");
+const messagesRoute = require("./routes/messages");
+const Socket = require("./socket/socket");
 
 app.use(cors());
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -31,6 +35,7 @@ app.use("/api/postings", postsRoute);
 app.use("/api/users", usersRoute);
 app.use("/api/notifications", notificationsRoute);
 app.use("/api/offerings", offeringsRoute);
+app.use("/api/messages", messagesRoute);
 
 // Routes
 app.get("/", (req, res) => {
@@ -50,6 +55,8 @@ mongoose.connect(
 );
 
 const server = http.createServer(app);
+
+Socket.setupSocket(socketio(server));
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}.`);

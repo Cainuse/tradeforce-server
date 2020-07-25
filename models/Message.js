@@ -6,6 +6,14 @@ const MessageSchema = Schema({
       type: String,
       required: true
   },
+  fromUserId: {
+    type: String,
+    required: true,
+  },
+  toUserId: {
+    type: String,
+    required: true,
+  },
   date: {
     type: Date,
     default: new Date(),
