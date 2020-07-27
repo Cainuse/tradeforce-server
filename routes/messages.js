@@ -21,9 +21,61 @@ router.get("/", async (req, res) => {
   const fromUserId = req.body.fromUserId;
   const toUserId = req.body.toUserId;
 
+  const findCond = {
+    $or: [
+      {
+        $and: [
+          {
+            toUserId: fromUserId,
+          },
+          {
+            fromUserId: toUserId,
+          },
+        ],
+      },
+      {
+        $and: [
+          {
+            toUserId: toUserId,
+          },
+          {
+            fromUserId: fromUserId,
+          },
+        ],
+      },
+    ],
+  };
+
   try {
-    const messages = await Message.find({ fromUserId, toUserId });
+    const messages = await Message.find(findCond);
     res.status(200).json(messages);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
+router.post("/", async (req, res) => {
+  const reqBody = req.body;
+
+  try {
+    const fromUserId = reqBody.fromUserId;
+    const toUserId = reqBody.toUserId;
+    const fromUserName = reqBody.fromUserName;
+    const toUserName = reqBody.toUserName;
+    const content = reqBody.content;
+
+    const message = new Message({
+      fromUserName,
+      toUserName,
+      fromUserId,
+      toUserId,
+      content,
+    });
+    const savedMsg = await message.save();
+    res.status(200).json(savedMsg);
   } catch (err) {
     console.log(err);
     res.status(500).json({
