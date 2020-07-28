@@ -1,6 +1,5 @@
 const User = require("../models/User").User;
 const Message = require("../models/Message");
-const ObjectId = require("mongoose").Types.ObjectId;
 
 const socketEvents = (io) => {
   io.on("connection", (socket) => {
