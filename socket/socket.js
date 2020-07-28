@@ -121,7 +121,7 @@ const socketEvents = (io) => {
       socket.broadcast.emit(`chat-list-response`, {
         error: false,
         userDisconnected: true,
-        socketId: socket.request._query["userId"],
+        userId: socket.request._query["userId"],
       });
     });
   });
