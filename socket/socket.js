@@ -22,11 +22,16 @@ const socketEvents = (io) => {
             getUserInfo(data.userId),
             getChatList(data.userId),
           ]);
+
+          // this emit is returning the currentUser's chat list to themselves
           io.to(socket.id).emit(`chat-list-response`, {
             error: false,
             singleUser: false,
             chatList: chatlistResponse,
           });
+
+          // this emit updates the status of any new online or offline users to everyone
+          // (useful for indicating which of your contacts is online/offline)
           socket.broadcast.emit(`chat-list-response`, {
             error: false,
             singleUser: true,
@@ -68,7 +73,10 @@ const socketEvents = (io) => {
             getUserSocketId(data.toUserId),
             insertMessages(data),
           ]);
-          io.to(toSocketId).emit(`add-message-response`, messageResult.chatMsg);
+          io.to(toSocketId).emit(`add-message-response`, {
+            error: false,
+            chatMsg: messageResult.chatMsg,
+          });
         } catch (error) {
           io.to(socket.id).emit(`add-message-response`, {
             error: true,
@@ -80,7 +88,7 @@ const socketEvents = (io) => {
     });
 
     /**
-     * Logout the user
+     * Set user to offline (logout of socket)
      */
     socket.on("logout", async (data) => {
       try {
@@ -91,7 +99,8 @@ const socketEvents = (io) => {
           message: "User is now offline",
           userId,
         });
-
+        // broadcast to all users who have this user in their chat list that
+        // the user has become offline
         socket.broadcast.emit(`chat-list-response`, {
           error: false,
           userDisconnected: true,
@@ -104,17 +113,6 @@ const socketEvents = (io) => {
           userId,
         });
       }
-    });
-
-    /**
-     * sending the disconnected user to all socket users.
-     */
-    socket.on("disconnect", async () => {
-      socket.broadcast.emit(`chat-list-response`, {
-        error: false,
-        userDisconnected: true,
-        userid: socket.request._query["userId"],
-      });
     });
   });
 };
@@ -193,14 +191,14 @@ const getUserInfo = async (userId) => {
   }
 };
 
-const insertMessages = async (msg) => {
+const insertMessages = async (msgData) => {
   try {
     const message = new Message({
-      fromUserName: msg.fromUserName,
-      toUserName: msg.toUserName,
-      fromUserId: msg.fromUserId,
-      toUserId: msg.toUserId,
-      content: msg.content,
+      fromUserName: msgData.fromUserName,
+      toUserName: msgData.toUserName,
+      fromUserId: msgData.fromUserId,
+      toUserId: msgData.toUserId,
+      content: msgData.content,
     });
     const savedMsg = await message.save();
     return {
@@ -254,10 +252,17 @@ const setupSocket = (receivedSocket) => {
   const io = receivedSocket;
   io.use(async (socket, next) => {
     try {
-      await addSocketId(socket.request._query["userId"], socket.id);
+      console.log("socket id is:");
+      console.log(socket.id);
+      const updateSocketResp = await addSocketId(
+        socket.request._query["userId"],
+        socket.id
+      );
+      if (updateSocketResp.error) {
+        throw new Error(updateSocketResp.message);
+      }
       next();
     } catch (error) {
-      // Error
       console.error(error);
     }
   });

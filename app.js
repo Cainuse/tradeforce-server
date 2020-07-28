@@ -53,21 +53,13 @@ mongoose.connect(
   { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
   () => {
     console.log("Connected to DB!");
-    launchServer();
   }
 );
 
-const launchServer = () => {
-  const server = http.createServer(app);
+const server = http.createServer(app);
 
-  Socket.setupSocket(socketio(server));
-  const clientSocket = io("http://localhost:5000", {
-    query: `userId=5f08d1694c6cf3111e1a25ed`,
-  });
+Socket.setupSocket(socketio(server));
 
-  clientSocket.emit("chat-list", { userId: `5f08d1694c6cf3111e1a25ed` });
-
-  server.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}.`);
-  });
-};
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}.`);
+});

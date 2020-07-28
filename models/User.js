@@ -67,6 +67,7 @@ const UserSchema = Schema({
   },
   socketId: {
     type: String,
+    default: "",
   },
 });
 
