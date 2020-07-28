@@ -34,7 +34,7 @@ const socketEvents = (io) => {
           socket.broadcast.emit(`chat-list-response`, {
             error: false,
             singleUser: true,
-            chatList: UserInfoResponse,
+            userInfo: UserInfoResponse,
           });
         } catch (error) {
           io.to(socket.id).emit(`chat-list-response`, {
@@ -93,6 +93,7 @@ const socketEvents = (io) => {
       try {
         const userId = data.userId;
         await logout(userId);
+        const userInfo = await getUserInfo(userId);
         io.to(socket.id).emit(`logout-response`, {
           error: false,
           message: "User is now offline",
@@ -103,7 +104,7 @@ const socketEvents = (io) => {
         socket.broadcast.emit(`chat-list-response`, {
           error: false,
           userDisconnected: true,
-          userId,
+          userInfo,
         });
       } catch (error) {
         io.to(socket.id).emit(`logout-response`, {
