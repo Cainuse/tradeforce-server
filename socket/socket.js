@@ -113,6 +113,17 @@ const socketEvents = (io) => {
         });
       }
     });
+
+    /**
+     * sending the disconnected user to all socket users.
+     */
+    socket.on("disconnect", async () => {
+      socket.broadcast.emit(`chat-list-response`, {
+        error: false,
+        userDisconnected: true,
+        socketId: socket.request._query["userId"],
+      });
+    });
   });
 };
 
