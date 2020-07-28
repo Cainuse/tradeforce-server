@@ -57,6 +57,18 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/allMsgs", async (req, res) => {
+  try {
+    const savedMsgs = await Message.find();
+    res.status(200).json(savedMsgs);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Error code 500: Failed to process request",
+    });
+  }
+});
+
 router.post("/", async (req, res) => {
   const reqBody = req.body;
 

@@ -4,6 +4,8 @@ const app = express();
 
 const http = require("http");
 
+const io = require("socket.io-client");
+
 const socketio = require("socket.io");
 
 const mongoose = require("mongoose");
@@ -51,13 +53,21 @@ mongoose.connect(
   { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
   () => {
     console.log("Connected to DB!");
+    launchServer();
   }
 );
 
-const server = http.createServer(app);
+const launchServer = () => {
+  const server = http.createServer(app);
 
-Socket.setupSocket(socketio(server));
+  Socket.setupSocket(socketio(server));
+  const clientSocket = io("http://localhost:5000", {
+    query: `userId=5f08d1694c6cf3111e1a25ed`,
+  });
 
-server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}.`);
-});
+  clientSocket.emit("chat-list", { userId: `5f08d1694c6cf3111e1a25ed` });
+
+  server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}.`);
+  });
+};

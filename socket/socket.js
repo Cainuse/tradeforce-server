@@ -1,5 +1,6 @@
-const User = require("../models/User");
+const User = require("../models/User").User;
 const Message = require("../models/Message");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 const socketEvents = (io) => {
   io.on("connection", (socket) => {
@@ -8,7 +9,9 @@ const socketEvents = (io) => {
     // find who the current user has interacted with, extract all those userIds
     // and send them back, indicating all contacts
     socket.on(`chat-list`, async (data) => {
-      if (data.fromUserId == "") {
+      console.log(data);
+      console.log(socket.id);
+      if (data.userId == "") {
         io.emit(`chat-list-response`, {
           error: true,
           message: "User not found",
@@ -17,7 +20,7 @@ const socketEvents = (io) => {
         try {
           const [UserInfoResponse, chatlistResponse] = await Promise.all([
             getUserInfo(data.userId),
-            getChatList(socket.id),
+            getChatList(data.userId),
           ]);
           io.to(socket.id).emit(`chat-list-response`, {
             error: false,
@@ -134,27 +137,36 @@ const logout = async (userId) => {
 
 const getChatList = async (userId) => {
   try {
-    const messages = await Message.find({
-      $or: [{ toUserId: userId }, { fromUserId: userId }],
-    });
+    const findCond = {
+      $or: [
+        {
+          toUserId: userId,
+        },
+        {
+          fromUserId: userId,
+        },
+      ],
+    };
+    const messages = await Message.find(findCond);
     const usersInteractedWith = messages.map((msgObj) => {
       return msgObj.toUserId === userId ? msgObj.fromUserId : msgObj.toUserId;
     });
-    console.log(messages);
     const uniqueChatlistUserIds = [...new Set(usersInteractedWith)];
     const uniqueChatList = [];
-    for (const userId in uniqueChatlistUserIds) {
+    for (const userId of uniqueChatlistUserIds) {
       const userInfo = await getUserInfo(userId);
       if (userInfo.error) {
         throw new Error();
       }
       uniqueChatList.push(userInfo.user);
     }
+    console.log(uniqueChatList);
     return {
       error: false,
       chatList: uniqueChatList,
     };
   } catch (err) {
+    console.log(err);
     return {
       error: true,
       message: `Failed to find any messages involving userId ${userId}`,
@@ -164,6 +176,7 @@ const getChatList = async (userId) => {
 
 const getUserInfo = async (userId) => {
   try {
+    console.log(userId);
     const user = await User.findOne({ _id: userId }).select(
       "userName isOnline socketId profilePic firstName lastName"
     );
@@ -172,6 +185,7 @@ const getUserInfo = async (userId) => {
       user,
     };
   } catch (err) {
+    console.log(err);
     return {
       error: true,
       message: `The userId ${userId} does not match any records in the db.`,
@@ -239,7 +253,6 @@ const addSocketId = async (userId, socketId) => {
 const setupSocket = (receivedSocket) => {
   const io = receivedSocket;
   io.use(async (socket, next) => {
-    console.log(socket);
     try {
       await addSocketId(socket.request._query["userId"], socket.id);
       next();
