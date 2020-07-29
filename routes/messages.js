@@ -9,7 +9,7 @@ const messageValidation = joi.object({
 });
 
 router.get("/", async (req, res) => {
-  const reqBody = req.body;
+  const reqBody = req.query;
 
   const { error } = messageValidation.validate(reqBody);
   if (error) {
@@ -18,8 +18,8 @@ router.get("/", async (req, res) => {
     });
   }
 
-  const fromUserId = req.body.fromUserId;
-  const toUserId = req.body.toUserId;
+  const fromUserId = reqBody.fromUserId;
+  const toUserId = reqBody.toUserId;
 
   const findCond = {
     $or: [
