@@ -75,13 +75,9 @@ router.post("/", async (req, res) => {
   try {
     const fromUserId = reqBody.fromUserId;
     const toUserId = reqBody.toUserId;
-    const fromUserName = reqBody.fromUserName;
-    const toUserName = reqBody.toUserName;
     const content = reqBody.content;
 
     const message = new Message({
-      fromUserName,
-      toUserName,
       fromUserId,
       toUserId,
       content,
