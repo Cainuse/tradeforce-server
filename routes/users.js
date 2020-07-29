@@ -8,7 +8,6 @@ const Review = require("../models/User").Review;
 const router = express.Router();
 
 const SecurityUtil = require("../utils/securityUtil");
-const validateToken = require("../middleware/validateToken");
 
 const registerValidation = joi.object({
   firstName: joi.string().required(),
@@ -151,7 +150,26 @@ router.post("/login", async (req, res) => {
   });
 });
 
-router.post("/authenticate", validateToken);
+router.post("/authenticate", (req, res) => {
+  const token = req.body.token;
+
+  if (!token) {
+    return res.status(401).json({
+      message: "Access denied!",
+    });
+  }
+
+  try {
+    const verified = jwt.verify(token, process.env.TOKEN_SECRET);
+    res.set("Access-Control-Allow-Origin", "*");
+    req.user = verified;
+    res.status(200).json(verified);
+  } catch (err) {
+    res.status(400).json({
+      message: "Invalid Token",
+    });
+  }
+});
 
 // http://localhost/api/users/{userId} ////////////////////////////////////////////
 // GET
@@ -224,14 +242,14 @@ router.get("/:userId/postings/complete", async (req, res) => {
       ownerId: req.params.userId,
       active: true,
     }).populate("offerings");
-    const postingPreviews = postingsOfUser.map((post) => (
-      { _id: post._id,    
-        date: post.date,
-        title: post.title,
-        location: post.location,
-        images: [post.images[0]],
-      offerings: post.offerings}
-    ));
+    const postingPreviews = postingsOfUser.map((post) => ({
+      _id: post._id,
+      date: post.date,
+      title: post.title,
+      location: post.location,
+      images: [post.images[0]],
+      offerings: post.offerings,
+    }));
     res.status(200).json(postingPreviews);
 
     // res.status(200).json(postingsOfUser);
@@ -308,14 +326,14 @@ router.get("/:userId/postings/active", async (req, res) => {
     const postingsOfUser = await Posting.find({
       ownerId: req.params.userId,
       active: true,
-    });    
-    const postingPreviews = postingsOfUser.map((post) => (
-      { _id: post._id,    
-        date: post.date,
-        title: post.title,
-        location: post.location,
-        images: [post.images[0]]}
-    ));
+    });
+    const postingPreviews = postingsOfUser.map((post) => ({
+      _id: post._id,
+      date: post.date,
+      title: post.title,
+      location: post.location,
+      images: [post.images[0]],
+    }));
     res.status(200).json(postingPreviews);
 
     // res.status(200).json(postingsOfUser);
@@ -332,13 +350,13 @@ router.get("/:userId/postings/inactive", async (req, res) => {
       ownerId: req.params.userId,
       active: false,
     });
-    const postingPreviews = postingsOfUser.map((post) => (
-      { _id: post._id,    
-        date: post.date,
-        title: post.title,
-        location: post.location,
-        images: [post.images[0]]}
-    ));
+    const postingPreviews = postingsOfUser.map((post) => ({
+      _id: post._id,
+      date: post.date,
+      title: post.title,
+      location: post.location,
+      images: [post.images[0]],
+    }));
     res.status(200).json(postingPreviews);
 
     // res.status(200).json(postingsOfUser);
