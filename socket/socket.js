@@ -115,17 +115,6 @@ const socketEvents = (io) => {
         });
       }
     });
-
-    /**
-     * sending the disconnected user to all socket users.
-     */
-    socket.on("disconnect", async () => {
-      socket.broadcast.emit(`chat-list-response`, {
-        error: false,
-        userDisconnected: true,
-        userId: socket.request._query["userId"],
-      });
-    });
   });
 };
 
@@ -170,7 +159,6 @@ const getChatList = async (userId) => {
       }
       uniqueChatList.push(userInfo.user);
     }
-
     return {
       error: false,
       chatList: uniqueChatList,
