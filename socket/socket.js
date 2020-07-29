@@ -8,8 +8,6 @@ const socketEvents = (io) => {
     // find who the current user has interacted with, extract all those userIds
     // and send them back, indicating all contacts
     socket.on(`chat-list`, async (data) => {
-      console.log(data);
-      console.log(socket.id);
       if (data.userId == "") {
         io.emit(`chat-list-response`, {
           error: true,
@@ -17,24 +15,12 @@ const socketEvents = (io) => {
         });
       } else {
         try {
-          const [UserInfoResponse, chatlistResponse] = await Promise.all([
-            getUserInfo(data.userId),
-            getChatList(data.userId),
-          ]);
+          const chatlistResponse = await getChatList(data.userId);
 
           // this emit is returning the currentUser's chat list to themselves
           io.to(socket.id).emit(`chat-list-response`, {
             error: false,
-            singleUser: false,
             chatList: chatlistResponse,
-          });
-
-          // this emit updates the status of any new online or offline users to everyone
-          // (useful for indicating which of your contacts is online/offline)
-          socket.broadcast.emit(`chat-list-response`, {
-            error: false,
-            singleUser: true,
-            userInfo: UserInfoResponse,
           });
         } catch (error) {
           io.to(socket.id).emit(`chat-list-response`, {
@@ -86,25 +72,40 @@ const socketEvents = (io) => {
       }
     });
 
+    // data needs to have userId of user whose status changed (online/offline)
+    // and the status to change it to, online = true, offline = false
+    socket.on("status-change", async (data) => {
+      const userId = data.userId;
+      try {
+        const userInfo = await getUserInfo(userId);
+        // broadcast to all users who have this user in their chat list that
+        // the user has changed status to either online or offline
+        socket.broadcast.emit(`status-change-response`, {
+          error: false,
+          userOnline: data.status,
+          userInfo,
+        });
+      } catch (err) {
+        io.to(socket.id).emit(`status-change-response`, {
+          error: true,
+          message: `Failed to update the user status to ${data.status}`,
+          userId,
+        });
+      }
+    });
+
     /**
      * Set user to offline (logout of socket)
      */
     socket.on("logout", async (data) => {
+      const userId = data.userId;
       try {
-        const userId = data.userId;
         await logout(userId);
-        const userInfo = await getUserInfo(userId);
+
         io.to(socket.id).emit(`logout-response`, {
           error: false,
           message: "User is now offline",
           userId,
-        });
-        // broadcast to all users who have this user in their chat list that
-        // the user has become offline
-        socket.broadcast.emit(`chat-list-response`, {
-          error: false,
-          userDisconnected: true,
-          userInfo,
         });
       } catch (error) {
         io.to(socket.id).emit(`logout-response`, {
@@ -113,17 +114,6 @@ const socketEvents = (io) => {
           userId,
         });
       }
-    });
-
-    /**
-     * sending the disconnected user to all socket users.
-     */
-    socket.on("disconnect", async () => {
-      socket.broadcast.emit(`chat-list-response`, {
-        error: false,
-        userDisconnected: true,
-        userId: socket.request._query["userId"],
-      });
     });
   });
 };
@@ -169,13 +159,11 @@ const getChatList = async (userId) => {
       }
       uniqueChatList.push(userInfo.user);
     }
-    console.log(uniqueChatList);
     return {
       error: false,
       chatList: uniqueChatList,
     };
   } catch (err) {
-    console.log(err);
     return {
       error: true,
       message: `Failed to find any messages involving userId ${userId}`,
@@ -185,7 +173,6 @@ const getChatList = async (userId) => {
 
 const getUserInfo = async (userId) => {
   try {
-    console.log(userId);
     const user = await User.findOne({ _id: userId }).select(
       "userName isOnline socketId profilePic firstName lastName"
     );
@@ -194,7 +181,6 @@ const getUserInfo = async (userId) => {
       user,
     };
   } catch (err) {
-    console.log(err);
     return {
       error: true,
       message: `The userId ${userId} does not match any records in the db.`,
@@ -205,8 +191,6 @@ const getUserInfo = async (userId) => {
 const insertMessages = async (msgData) => {
   try {
     const message = new Message({
-      fromUserName: msgData.fromUserName,
-      toUserName: msgData.toUserName,
       fromUserId: msgData.fromUserId,
       toUserId: msgData.toUserId,
       content: msgData.content,
@@ -262,20 +246,14 @@ const addSocketId = async (userId, socketId) => {
 const setupSocket = (receivedSocket) => {
   const io = receivedSocket;
   io.use(async (socket, next) => {
-    try {
-      console.log("socket id is:");
-      console.log(socket.id);
-      const updateSocketResp = await addSocketId(
-        socket.request._query["userId"],
-        socket.id
-      );
-      if (updateSocketResp.error) {
-        throw new Error(updateSocketResp.message);
-      }
-      next();
-    } catch (error) {
-      console.error(error);
+    const updateSocketResp = await addSocketId(
+      socket.request._query["userId"],
+      socket.id
+    );
+    if (updateSocketResp.error) {
+      throw new Error(updateSocketResp.message);
     }
+    next();
   });
 
   socketEvents(io);
