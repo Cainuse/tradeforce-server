@@ -58,12 +58,10 @@ const socketEvents = (io) => {
             getUserSocketId(data.toUserId),
             insertMessages(data),
           ]);
-          console.log(toSocketId);
           io.to(toSocketId.socketId).emit(`add-message-response`, {
             error: false,
             chatMsg: messageResult.chatMsg,
           });
-          console.log(`message emitted to: ${data.toUserId}`);
         } catch (error) {
           io.to(socket.id).emit(`add-message-response`, {
             error: true,
@@ -77,7 +75,6 @@ const socketEvents = (io) => {
     // data needs to have userId of user whose status changed (online/offline)
     // and the status to change it to, online = true, offline = false
     socket.on("status-change", async (data) => {
-      console.log(`status change user ${data.userId} isOnline=${data.status}`)
       const userId = data.userId;
       try {
         const userInfo = await getUserInfo(userId);
@@ -88,7 +85,6 @@ const socketEvents = (io) => {
           userOnline: data.status,
           userInfo,
         });
-        console.log("status change emitted");
       } catch (err) {
         io.to(socket.id).emit(`status-change-response`, {
           error: true,
