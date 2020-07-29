@@ -8,8 +8,6 @@ const socketEvents = (io) => {
     // find who the current user has interacted with, extract all those userIds
     // and send them back, indicating all contacts
     socket.on(`chat-list`, async (data) => {
-      console.log(data);
-      console.log(socket.id);
       if (data.userId == "") {
         io.emit(`chat-list-response`, {
           error: true,
@@ -169,13 +167,11 @@ const getChatList = async (userId) => {
       }
       uniqueChatList.push(userInfo.user);
     }
-    console.log(uniqueChatList);
     return {
       error: false,
       chatList: uniqueChatList,
     };
   } catch (err) {
-    console.log(err);
     return {
       error: true,
       message: `Failed to find any messages involving userId ${userId}`,
@@ -185,7 +181,6 @@ const getChatList = async (userId) => {
 
 const getUserInfo = async (userId) => {
   try {
-    console.log(userId);
     const user = await User.findOne({ _id: userId }).select(
       "userName isOnline socketId profilePic firstName lastName"
     );
@@ -194,7 +189,6 @@ const getUserInfo = async (userId) => {
       user,
     };
   } catch (err) {
-    console.log(err);
     return {
       error: true,
       message: `The userId ${userId} does not match any records in the db.`,
@@ -262,20 +256,14 @@ const addSocketId = async (userId, socketId) => {
 const setupSocket = (receivedSocket) => {
   const io = receivedSocket;
   io.use(async (socket, next) => {
-    try {
-      console.log("socket id is:");
-      console.log(socket.id);
-      const updateSocketResp = await addSocketId(
-        socket.request._query["userId"],
-        socket.id
-      );
-      if (updateSocketResp.error) {
-        throw new Error(updateSocketResp.message);
-      }
-      next();
-    } catch (error) {
-      console.error(error);
+    const updateSocketResp = await addSocketId(
+      socket.request._query["userId"],
+      socket.id
+    );
+    if (updateSocketResp.error) {
+      throw new Error(updateSocketResp.message);
     }
+    next();
   });
 
   socketEvents(io);

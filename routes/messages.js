@@ -50,7 +50,6 @@ router.get("/", async (req, res) => {
     const messages = await Message.find(findCond);
     res.status(200).json(messages);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -62,7 +61,6 @@ router.get("/allMsgs", async (req, res) => {
     const savedMsgs = await Message.find();
     res.status(200).json(savedMsgs);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -75,13 +73,9 @@ router.post("/", async (req, res) => {
   try {
     const fromUserId = reqBody.fromUserId;
     const toUserId = reqBody.toUserId;
-    const fromUserName = reqBody.fromUserName;
-    const toUserName = reqBody.toUserName;
     const content = reqBody.content;
 
     const message = new Message({
-      fromUserName,
-      toUserName,
       fromUserId,
       toUserId,
       content,
@@ -89,7 +83,6 @@ router.post("/", async (req, res) => {
     const savedMsg = await message.save();
     res.status(200).json(savedMsg);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
