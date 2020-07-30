@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { boolean } = require("@hapi/joi");
 const Schema = mongoose.Schema;
 
 const ReviewSchema = Schema({
@@ -21,7 +22,7 @@ const UserSchema = Schema({
   },
   lastName: {
     type: String,
-    default: ""
+    default: "",
   },
   userName: {
     type: String,
@@ -59,6 +60,14 @@ const UserSchema = Schema({
   reviews: {
     type: [{ type: Schema.Types.ObjectId, ref: "Review" }],
     default: [],
+  },
+  isOnline: {
+    type: Boolean,
+    default: false,
+  },
+  socketId: {
+    type: String,
+    default: "",
   },
 });
 
