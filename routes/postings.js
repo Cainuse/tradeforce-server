@@ -23,13 +23,17 @@ router.get("/", async (req, res) => {
 // GET
 // returns a page of active postings
 router.get("/active/:page", async (req, res) => {
-  const resultsPerPage = 10;
+  const resultsPerPage = 12;
   const currentPage = req.params.page;
   try {
     const postings = await Posting.find({ active: true })
       .sort({ date: "desc" })
       .skip(resultsPerPage * currentPage - resultsPerPage)
       .limit(resultsPerPage);
+    const totalResultsCount = await Posting.countDocuments({
+      active: true,
+    });
+    const totalPages = Math.ceil(totalResultsCount / resultsPerPage);
     const postingPreviews = postings.map((post) => ({
       _id: post._id,
       date: post.date,
@@ -37,7 +41,11 @@ router.get("/active/:page", async (req, res) => {
       location: post.location,
       images: [post.images[0]],
     }));
-    res.status(200).json(postingPreviews);
+    res.status(200).json({
+      numResults: totalResultsCount,
+      numPages: totalPages,
+      postingPreviews: postingPreviews,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -89,6 +97,7 @@ router.get("/search/:query", async (req, res) => {
     const postings = await Posting.find(queryParams, {
       score: { $meta: "textScore" },
     }).sort({ date: "desc", score: { $meta: "textScore" } });
+
     const postingPreviews = postings.map((post) => ({
       _id: post._id,
       date: post.date,
@@ -108,7 +117,7 @@ router.get("/search/:query", async (req, res) => {
 // GET
 // Returns a page of postings whose fields contain search query
 router.get("/search/:query/:page", async (req, res) => {
-  const resultsPerPage = 10;
+  const resultsPerPage = 12;
   const currentPage = req.params.page;
   try {
     let queryParams = { active: true };
@@ -130,6 +139,10 @@ router.get("/search/:query/:page", async (req, res) => {
       .sort({ date: "desc", score: { $meta: "textScore" } })
       .skip(resultsPerPage * currentPage - resultsPerPage)
       .limit(resultsPerPage);
+
+    const totalResultsCount = await Posting.countDocuments(queryParams);
+    const totalPages = Math.ceil(totalResultsCount / resultsPerPage);
+
     const postingPreviews = postings.map((post) => ({
       _id: post._id,
       date: post.date,
@@ -137,7 +150,12 @@ router.get("/search/:query/:page", async (req, res) => {
       location: post.location,
       images: [post.images[0]],
     }));
-    res.status(200).json(postingPreviews);
+
+    res.status(200).json({
+      numResults: totalResultsCount,
+      numPages: totalPages,
+      postingPreviews: postingPreviews,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({
