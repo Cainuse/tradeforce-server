@@ -12,6 +12,8 @@ const bodyParser = require("body-parser");
 
 var cors = require("cors");
 
+let LocationUtil = require("./utils/locationUtil");
+
 require("dotenv/config");
 
 const PORT = process.env.PORT || 5000;
