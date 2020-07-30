@@ -15,6 +15,12 @@ const ReviewSchema = Schema({
   },
 });
 
+const Location = Schema({
+  location: String,
+  lat: Number,
+  lon: Number,
+});
+
 const UserSchema = Schema({
   firstName: {
     type: String,
@@ -42,8 +48,7 @@ const UserSchema = Schema({
     default: "V7Y 1G5", // pacific center postal code
   },
   location: {
-    type: String,
-    default: "Vancouver, BC",
+    type: Location,
   },
   dateRegistered: {
     type: Date,
@@ -77,4 +82,5 @@ const Review = mongoose.model("Review", ReviewSchema);
 module.exports = {
   User,
   Review,
+  Location,
 };

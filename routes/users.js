@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const Offering = require("../models/Offering");
 const Posting = require("../models/Posting");
 const Review = require("../models/User").Review;
+const LocationUtil = require("../utils/locationUtil");
 const router = express.Router();
 
 const SecurityUtil = require("../utils/securityUtil");
@@ -400,10 +401,16 @@ router.delete("/:userId", async (req, res) => {
 
 // PATCH
 router.patch("/:userId", async (req, res) => {
+  const body = req.body;
+
+  if (body.postalCode) {
+    body.location = await LocationUtil.getLocationByPostalCode(body.postalCode);
+  }
+
   try {
     const updatedUser = await User.updateOne(
       { _id: req.params.userId },
-      { $set: req.body }
+      { $set: body }
     );
     res.status(200).json(updatedUser);
   } catch (err) {
