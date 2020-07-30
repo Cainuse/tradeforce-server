@@ -115,6 +115,26 @@ const socketEvents = (io) => {
         });
       }
     });
+
+    socket.on("disconnect", async () => {
+      const userId = socket.request._query["userId"];
+      try {
+        const userInfo = await getUserInfo(userId);
+        // broadcast to all users who have this user in their chat list that
+        // the user has changed status to either online or offline
+        socket.broadcast.emit(`status-change-response`, {
+          error: false,
+          userOnline: false,
+          userInfo,
+        });
+      } catch (err) {
+        io.to(socket.id).emit(`status-change-response`, {
+          error: true,
+          message: `Failed to update the user status to ${data.status}`,
+          userId,
+        });
+      }
+    });
   });
 };
 
