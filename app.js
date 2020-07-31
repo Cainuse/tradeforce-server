@@ -4,8 +4,6 @@ const app = express();
 
 const http = require("http");
 
-const io = require("socket.io-client");
-
 const socketio = require("socket.io");
 
 const mongoose = require("mongoose");
@@ -58,7 +56,11 @@ mongoose.connect(
 
 const server = http.createServer(app);
 
-Socket.setupSocket(socketio(server));
+Socket.setupSocket(
+  socketio(server, {
+    transports: ["websocket"],
+  })
+);
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}.`);
