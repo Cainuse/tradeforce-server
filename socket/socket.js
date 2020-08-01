@@ -94,6 +94,32 @@ const socketEvents = (io) => {
       }
     });
 
+    /*
+    * Notify user of new notification
+    */
+
+    socket.on("notify-recipient", async (data) => {
+      const userId = data.userId;
+      try {
+        if(!userId){        
+          io.to(socket.id).emit("new-notification", {
+            error: true,
+            message: "User ID not provided",
+          });}
+        const toSocketId = await getUserSocketId(userId);
+        io.to(toSocketId.socketId).emit("new-notification", {
+          error: false
+        });
+        // console.log('sent notification');
+      } catch (error) {
+        // console.log(error);
+        io.to(socket.id).emit("new-notification", {
+          error: true,
+          message: "Notification could not be sent",
+        });
+      }
+    })
+
     /**
      * Set user to offline (logout of socket)
      */
