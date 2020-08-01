@@ -97,7 +97,6 @@ const socketEvents = (io) => {
     /*
     * Notify user of new notification
     */
-
     socket.on("notify-recipient", async (data) => {
       const userId = data.userId;
       try {
@@ -240,6 +239,7 @@ const insertMessages = async (msgData) => {
       fromUserId: msgData.fromUserId,
       toUserId: msgData.toUserId,
       content: msgData.content,
+      date: new Date()
     });
     const savedMsg = await message.save();
     return {
