@@ -18,6 +18,11 @@ const MessageSchema = Schema({
     type: String,
     required: true,
   },
+  isUnread: {
+    type: Boolean,
+    required: true,
+    default: true
+  }
 });
 
 module.exports = mongoose.model("Message", MessageSchema);
