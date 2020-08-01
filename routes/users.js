@@ -403,11 +403,24 @@ router.delete("/:userId", async (req, res) => {
 router.patch("/:userId", async (req, res) => {
   const body = req.body;
 
-  if (body.postalCode) {
-    body.location = await LocationUtil.getLocationByPostalCode(body.postalCode);
-  }
-
   try {
+    if (body.postalCode) {
+      const location = await LocationUtil.getLocationByPostalCode(
+        body.postalCode
+      );
+      body.location = location;
+
+      const postingsToUpdate = await Posting.updateMany(
+        {
+          ownerId: req.params.userId,
+          active: true,
+        },
+        {
+          location: location,
+        }
+      );
+    }
+
     const updatedUser = await User.updateOne(
       { _id: req.params.userId },
       { $set: body }

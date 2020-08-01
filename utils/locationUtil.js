@@ -10,11 +10,20 @@ const getLocationByPostalCode = async (postalCode) => {
     const response = await axios.get(url);
 
     const body = response.data;
-    const locationObject = {
-      location: getLocation(body.results[0]),
-      lat: body.results[0].geometry.location.lat,
-      lon: body.results[0].geometry.location.lng,
+
+    let locationObject = {
+      location: "Central Vancouver | Vancouver, BC",
+      lat: 49.2830972,
+      lon: -123.1175032,
     };
+
+    if (body.results.length > 0) {
+      locationObject = {
+        location: getLocation(body.results[0]),
+        lat: body.results[0].geometry.location.lat,
+        lon: body.results[0].geometry.location.lng,
+      };
+    }
 
     return locationObject;
   } catch (error) {
