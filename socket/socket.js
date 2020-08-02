@@ -239,7 +239,8 @@ const insertMessages = async (msgData) => {
       fromUserId: msgData.fromUserId,
       toUserId: msgData.toUserId,
       content: msgData.content,
-      date: new Date()
+      date: new Date(),
+      isUnread: true
     });
     const savedMsg = await message.save();
     return {
