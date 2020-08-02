@@ -6,29 +6,21 @@ const getLocationByPostalCode = async (postalCode) => {
     "&key=" +
     process.env.GOOGLE_MAPS_API_ACCESS_KEY;
 
-  try {
-    const response = await axios.get(url);
+  const response = await axios.get(url);
 
-    const body = response.data;
+  const body = response.data;
 
-    let locationObject = {
-      location: "Central Vancouver | Vancouver, BC",
-      lat: 49.2830972,
-      lon: -123.1175032,
-    };
-
-    if (body.results.length > 0) {
-      locationObject = {
-        location: getLocation(body.results[0]),
-        lat: body.results[0].geometry.location.lat,
-        lon: body.results[0].geometry.location.lng,
-      };
-    }
-
-    return locationObject;
-  } catch (error) {
-    console.log(error);
+  if (body.results.length <= 0) {
+    throw "No results found";
   }
+
+  const locationObject = {
+    location: getLocation(body.results[0]),
+    lat: body.results[0].geometry.location.lat,
+    lon: body.results[0].geometry.location.lng,
+  };
+
+  return locationObject;
 };
 
 function getLocation(loc) {

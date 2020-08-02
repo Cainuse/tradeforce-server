@@ -428,9 +428,15 @@ router.patch("/:userId", async (req, res) => {
     res.status(200).json(updatedUser);
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      message: "Error code 500: Failed to process request",
-    });
+    if (err == "No results found") {
+      res.status(400).json({
+        message: "Error code 400: No results returned by postal code",
+      });
+    } else {
+      res.status(500).json({
+        message: "Error code 500: Failed to process request",
+      });
+    }
   }
 });
 
