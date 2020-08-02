@@ -23,6 +23,7 @@ const socketEvents = (io) => {
             chatList: chatlistResponse,
           });
         } catch (error) {
+          console.log(error)
           io.to(socket.id).emit(`chat-list-response`, {
             error: true,
             chatList: [],
@@ -34,23 +35,19 @@ const socketEvents = (io) => {
     /**
      * send the messages to the user
      */
-    socket.on(`add-message`, async (data) => {
-      console.log('received message, and sending');
-      console.log(data);
+    socket.on(`add-message`, async (data, cb) => {
       if (data.message === "") {
         io.to(socket.id).emit(`add-message-response`, {
           error: true,
           message: "Message not found",
         });
       } else if (data.fromUserId === "") {
-        console.log("missing from user");
         io.to(socket.id).emit(`add-message-response`, {
           error: true,
           message:
             "server cannot process the request since requested fromUserId is missing from data",
         });
       } else if (data.toUserId === "") {
-        console.log("missing to user");
         io.to(socket.id).emit(`add-message-response`, {
           error: true,
           message:
@@ -62,13 +59,12 @@ const socketEvents = (io) => {
             getUserSocketId(data.toUserId),
             insertMessages(data),
           ]);
-          console.log(messageResult);
           io.to(toSocketId.socketId).emit(`add-message-response`, {
             error: false,
             chatMsg: messageResult.chatMsg,
           });
+          cb();
         } catch (error) {
-          console.log(error);
           io.to(socket.id).emit(`add-message-response`, {
             error: true,
             message:
@@ -241,17 +237,14 @@ const insertMessages = async (msgData) => {
 };
 
 const getUserSocketId = async (userId) => {
-  try {
-    const user = await User.findOne({ _id: userId });
+  const user = await User.findOne({ _id: userId });
+  if(user) {
     return {
       error: false,
       socketId: user.socketId,
-    };
-  } catch (err) {
-    return {
-      error: true,
-      message: `The userId ${userId} does not match any records in the db.`,
-    };
+    }
+  } else {
+    throw new Error(`The userId ${userId} does not match any records in the db.`);
   }
 };
 
