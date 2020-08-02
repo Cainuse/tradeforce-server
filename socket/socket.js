@@ -216,20 +216,13 @@ const getChatList = async (userId) => {
 };
 
 const getUserInfo = async (userId) => {
-  try {
-    const user = await User.findOne({ _id: userId }).select(
-      "userName isOnline socketId profilePic firstName lastName"
-    );
-    return {
-      error: false,
-      user,
-    };
-  } catch (err) {
-    return {
-      error: true,
-      message: `The userId ${userId} does not match any records in the db.`,
-    };
-  }
+  const user = await User.findOne({ _id: userId }).select(
+    "userName isOnline socketId profilePic firstName lastName"
+  );
+  return {
+    error: false,
+    user,
+  };
 };
 
 const insertMessages = async (msgData) => {
