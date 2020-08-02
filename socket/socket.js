@@ -23,7 +23,6 @@ const socketEvents = (io) => {
             chatList: chatlistResponse,
           });
         } catch (error) {
-          console.log(error)
           io.to(socket.id).emit(`chat-list-response`, {
             error: true,
             chatList: [],
@@ -111,9 +110,7 @@ const socketEvents = (io) => {
         io.to(toSocketId.socketId).emit("new-notification", {
           error: false
         });
-        // console.log('sent notification');
       } catch (error) {
-        // console.log(error);
         io.to(socket.id).emit("new-notification", {
           error: true,
           message: "Notification could not be sent",
