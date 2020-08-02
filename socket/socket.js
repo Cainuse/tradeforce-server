@@ -8,7 +8,7 @@ const socketEvents = (io) => {
     // find who the current user has interacted with, extract all those userIds
     // and send them back, indicating all contacts
     socket.on(`chat-list`, async (data) => {
-      if (data.userId == "") {
+      if (!data.userId || data.userId == "") {
         io.emit(`chat-list-response`, {
           error: true,
           message: "User not found",
@@ -35,18 +35,22 @@ const socketEvents = (io) => {
      * send the messages to the user
      */
     socket.on(`add-message`, async (data) => {
+      console.log('received message, and sending');
+      console.log(data);
       if (data.message === "") {
         io.to(socket.id).emit(`add-message-response`, {
           error: true,
           message: "Message not found",
         });
       } else if (data.fromUserId === "") {
+        console.log("missing from user");
         io.to(socket.id).emit(`add-message-response`, {
           error: true,
           message:
             "server cannot process the request since requested fromUserId is missing from data",
         });
       } else if (data.toUserId === "") {
+        console.log("missing to user");
         io.to(socket.id).emit(`add-message-response`, {
           error: true,
           message:
@@ -58,11 +62,13 @@ const socketEvents = (io) => {
             getUserSocketId(data.toUserId),
             insertMessages(data),
           ]);
+          console.log(messageResult);
           io.to(toSocketId.socketId).emit(`add-message-response`, {
             error: false,
             chatMsg: messageResult.chatMsg,
           });
         } catch (error) {
+          console.log(error);
           io.to(socket.id).emit(`add-message-response`, {
             error: true,
             message:
@@ -180,7 +186,6 @@ const logout = async (userId) => {
 };
 
 const getChatList = async (userId) => {
-  try {
     const findCond = {
       $or: [
         {
@@ -208,12 +213,6 @@ const getChatList = async (userId) => {
       error: false,
       chatList: uniqueChatList,
     };
-  } catch (err) {
-    return {
-      error: true,
-      message: `Failed to find any messages involving userId ${userId}`,
-    };
-  }
 };
 
 const getUserInfo = async (userId) => {
@@ -234,25 +233,18 @@ const getUserInfo = async (userId) => {
 };
 
 const insertMessages = async (msgData) => {
-  try {
-    const message = new Message({
-      fromUserId: msgData.fromUserId,
-      toUserId: msgData.toUserId,
-      content: msgData.content,
-      date: new Date(),
-      isUnread: true
-    });
-    const savedMsg = await message.save();
-    return {
-      error: false,
-      chatMsg: savedMsg,
-    };
-  } catch (err) {
-    return {
-      error: true,
-      message: "Failed to save the message in the db.",
-    };
-  }
+  const message = new Message({
+    fromUserId: msgData.fromUserId,
+    toUserId: msgData.toUserId,
+    content: msgData.content,
+    date: new Date(),
+    isUnread: true
+  });
+  const savedMsg = await message.save();
+  return {
+    error: false,
+    chatMsg: savedMsg,
+  };
 };
 
 const getUserSocketId = async (userId) => {
