@@ -6,6 +6,7 @@ const createNotification = async (userId, type, content) => {
       userId: userId,
       type: type,
       content: content,
+      date: new Date()
     }).save();
   } catch (err) {
     console.log(err);
