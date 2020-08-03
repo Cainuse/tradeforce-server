@@ -168,7 +168,6 @@ router.post("/authenticate", (req, res) => {
 
   try {
     const verified = jwt.verify(token, process.env.TOKEN_SECRET);
-    console.log(verified);
     res.set("Access-Control-Allow-Origin", "*");
     req.user = verified;
     res.status(200).json(verified);
