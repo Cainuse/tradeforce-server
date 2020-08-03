@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-// const validateToken = require('../middleware/validateToken');
 const Posting = require("../models/Posting");
 const Offering = require("../models/Offering");
 const User = require("../models/User").User;
@@ -40,6 +39,7 @@ router.get("/active/:page", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json({
       numResults: totalResultsCount,
@@ -67,6 +67,7 @@ router.get("/active", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
   } catch (err) {
@@ -104,6 +105,7 @@ router.get("/search/:query", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
   } catch (err) {
@@ -149,6 +151,7 @@ router.get("/search/:query/:page", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
 
     res.status(200).json({
@@ -168,6 +171,9 @@ router.get("/search/:query/:page", async (req, res) => {
 // Creates new posting based on input parameters
 router.post("/", async (req, res) => {
   const reqBody = req.body;
+
+  const owner = await User.findOne({ _id: reqBody.ownerId });
+
   const posting = new Posting({
     title: reqBody.title,
     date: reqBody.date,
@@ -179,7 +185,7 @@ router.post("/", async (req, res) => {
     requestedItems: reqBody.requestedItems,
     images: reqBody.images,
     ownerId: reqBody.ownerId,
-    location: reqBody.location,
+    location: owner.location,
   });
 
   try {

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const Location = require("../models/User").Location;
 const PostingSchema = Schema({
   title: {
     type: String,
@@ -34,7 +35,7 @@ const PostingSchema = Schema({
     type: String,
     required: true,
   },
-  location: String,
+  location: Location,
   active: {
     type: Boolean,
     default: true,

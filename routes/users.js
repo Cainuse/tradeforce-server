@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const Offering = require("../models/Offering");
 const Posting = require("../models/Posting");
 const Review = require("../models/User").Review;
+const LocationUtil = require("../utils/locationUtil");
 const router = express.Router();
 
 const SecurityUtil = require("../utils/securityUtil");
@@ -34,7 +35,6 @@ router.get("/", async (req, res) => {
     const users = await User.find();
     res.status(200).json(users);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -58,7 +58,6 @@ router.post("/", async (req, res) => {
       email: reqBody.email,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -69,6 +68,11 @@ router.post("/", async (req, res) => {
       message: "This email has already been registered.",
     });
   } else {
+    const location = reqBody.postalCode ? await LocationUtil.getLocationByPostalCode(reqBody.postalCode) : {
+      location: "Central Vancouver | Vancouver, BC",
+      lat: 49.2830972,
+      lon: -123.1175032,
+    };
     const user = new User({
       firstName: reqBody.firstName,
       lastName: reqBody.lastName,
@@ -77,6 +81,7 @@ router.post("/", async (req, res) => {
       postalCode: reqBody.postalCode,
       dateRegistered: reqBody.dateRegistered,
       isGoogleUser: reqBody.isGoogleUser,
+      location: location
     });
 
     try {
@@ -90,7 +95,6 @@ router.post("/", async (req, res) => {
         token,
       });
     } catch (err) {
-      console.log(err);
       res.status(500).json({
         message: "Error code 500: Failed to process request",
       });
@@ -118,7 +122,6 @@ router.post("/login", async (req, res) => {
       email: reqBody.email,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -184,7 +187,6 @@ router.get("/:userId", async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -249,6 +251,7 @@ router.get("/:userId/postings/complete", async (req, res) => {
       location: post.location,
       images: [post.images[0]],
       offerings: post.offerings,
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
 
@@ -280,7 +283,6 @@ router.post("/:userId/reviews", async (req, res) => {
 
     res.status(201).json(userToUpdate);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -298,7 +300,6 @@ router.get("/:userId/complete", async (req, res) => {
 
     res.status(201).json(userToUpdate);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -333,6 +334,7 @@ router.get("/:userId/postings/active", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
 
@@ -356,6 +358,7 @@ router.get("/:userId/postings/inactive", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
 
@@ -378,7 +381,6 @@ router.get("/findUser/:email", async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -391,7 +393,6 @@ router.delete("/:userId", async (req, res) => {
     const deletedUser = await User.deleteOne({ _id: req.params.userId });
     res.status(204).send();
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -400,17 +401,47 @@ router.delete("/:userId", async (req, res) => {
 
 // PATCH
 router.patch("/:userId", async (req, res) => {
+  const body = req.body;
+
   try {
-    const updatedUser = await User.updateOne(
+    if (body.postalCode) {
+      const location = await LocationUtil.getLocationByPostalCode(
+        body.postalCode
+      );
+      body.location = location;
+
+      const postingsToUpdate = await Posting.updateMany(
+        {
+          ownerId: req.params.userId,
+          active: true,
+        },
+        {
+          location: location,
+        }
+      );
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
       { _id: req.params.userId },
-      { $set: req.body }
+      { $set: body }, 
+      {new: true}
     );
-    res.status(200).json(updatedUser);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: "Error code 500: Failed to process request",
+    const token = jwt.sign(updatedUser.toJSON(), process.env.TOKEN_SECRET);
+    res.header("auth-token", token);
+    res.status(200).json({
+      body,
+      token,
     });
+  } catch (err) {
+    if (err == "No results found") {
+      res.status(400).json({
+        message: "Error code 400: No results returned by postal code",
+      });
+    } else {
+      res.status(500).json({
+        message: "Error code 500: Failed to process request",
+      });
+    }
   }
 });
 
