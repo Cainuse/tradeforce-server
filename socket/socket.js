@@ -8,7 +8,7 @@ const socketEvents = (io) => {
     // find who the current user has interacted with, extract all those userIds
     // and send them back, indicating all contacts
     socket.on(`chat-list`, async (data) => {
-      if (data.userId == "") {
+      if (!data.userId || data.userId === "") {
         io.emit(`chat-list-response`, {
           error: true,
           message: "User not found",
@@ -34,7 +34,7 @@ const socketEvents = (io) => {
     /**
      * send the messages to the user
      */
-    socket.on(`add-message`, async (data) => {
+    socket.on(`add-message`, async (data, cb) => {
       if (data.message === "") {
         io.to(socket.id).emit(`add-message-response`, {
           error: true,
@@ -62,6 +62,7 @@ const socketEvents = (io) => {
             error: false,
             chatMsg: messageResult.chatMsg,
           });
+          cb();
         } catch (error) {
           io.to(socket.id).emit(`add-message-response`, {
             error: true,
@@ -109,9 +110,7 @@ const socketEvents = (io) => {
         io.to(toSocketId.socketId).emit("new-notification", {
           error: false
         });
-        // console.log('sent notification');
       } catch (error) {
-        // console.log(error);
         io.to(socket.id).emit("new-notification", {
           error: true,
           message: "Notification could not be sent",
@@ -180,7 +179,6 @@ const logout = async (userId) => {
 };
 
 const getChatList = async (userId) => {
-  try {
     const findCond = {
       $or: [
         {
@@ -208,65 +206,42 @@ const getChatList = async (userId) => {
       error: false,
       chatList: uniqueChatList,
     };
-  } catch (err) {
-    return {
-      error: true,
-      message: `Failed to find any messages involving userId ${userId}`,
-    };
-  }
 };
 
 const getUserInfo = async (userId) => {
-  try {
-    const user = await User.findOne({ _id: userId }).select(
-      "userName isOnline socketId profilePic firstName lastName"
-    );
-    return {
-      error: false,
-      user,
-    };
-  } catch (err) {
-    return {
-      error: true,
-      message: `The userId ${userId} does not match any records in the db.`,
-    };
-  }
+  const user = await User.findOne({ _id: userId }).select(
+    "userName isOnline socketId profilePic firstName lastName"
+  );
+  return {
+    error: false,
+    user,
+  };
 };
 
 const insertMessages = async (msgData) => {
-  try {
-    const message = new Message({
-      fromUserId: msgData.fromUserId,
-      toUserId: msgData.toUserId,
-      content: msgData.content,
-      date: new Date(),
-      isUnread: true
-    });
-    const savedMsg = await message.save();
-    return {
-      error: false,
-      chatMsg: savedMsg,
-    };
-  } catch (err) {
-    return {
-      error: true,
-      message: "Failed to save the message in the db.",
-    };
-  }
+  const message = new Message({
+    fromUserId: msgData.fromUserId,
+    toUserId: msgData.toUserId,
+    content: msgData.content,
+    date: new Date(),
+    isUnread: true
+  });
+  const savedMsg = await message.save();
+  return {
+    error: false,
+    chatMsg: savedMsg,
+  };
 };
 
 const getUserSocketId = async (userId) => {
-  try {
-    const user = await User.findOne({ _id: userId });
+  const user = await User.findOne({ _id: userId });
+  if(user) {
     return {
       error: false,
       socketId: user.socketId,
-    };
-  } catch (err) {
-    return {
-      error: true,
-      message: `The userId ${userId} does not match any records in the db.`,
-    };
+    }
+  } else {
+    throw new Error(`The userId ${userId} does not match any records in the db.`);
   }
 };
 
