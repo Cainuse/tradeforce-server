@@ -39,6 +39,7 @@ router.get("/active/:page", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json({
       numResults: totalResultsCount,
@@ -66,6 +67,7 @@ router.get("/active", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
   } catch (err) {
@@ -103,6 +105,7 @@ router.get("/search/:query", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
   } catch (err) {
@@ -148,6 +151,7 @@ router.get("/search/:query/:page", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
 
     res.status(200).json({

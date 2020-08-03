@@ -70,6 +70,11 @@ router.post("/", async (req, res) => {
       message: "This email has already been registered.",
     });
   } else {
+    const location = reqBody.postalCode ? await LocationUtil.getLocationByPostalCode(reqBody.postalCode) : {
+      location: "Central Vancouver | Vancouver, BC",
+      lat: 49.2830972,
+      lon: -123.1175032,
+    };
     const user = new User({
       firstName: reqBody.firstName,
       lastName: reqBody.lastName,
@@ -78,6 +83,7 @@ router.post("/", async (req, res) => {
       postalCode: reqBody.postalCode,
       dateRegistered: reqBody.dateRegistered,
       isGoogleUser: reqBody.isGoogleUser,
+      location: location
     });
 
     try {
@@ -162,6 +168,7 @@ router.post("/authenticate", (req, res) => {
 
   try {
     const verified = jwt.verify(token, process.env.TOKEN_SECRET);
+    console.log(verified);
     res.set("Access-Control-Allow-Origin", "*");
     req.user = verified;
     res.status(200).json(verified);
@@ -250,6 +257,7 @@ router.get("/:userId/postings/complete", async (req, res) => {
       location: post.location,
       images: [post.images[0]],
       offerings: post.offerings,
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
 
@@ -334,6 +342,7 @@ router.get("/:userId/postings/active", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
 
@@ -357,6 +366,7 @@ router.get("/:userId/postings/inactive", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
+      ownerId: post.ownerId
     }));
     res.status(200).json(postingPreviews);
 
@@ -421,11 +431,17 @@ router.patch("/:userId", async (req, res) => {
       );
     }
 
-    const updatedUser = await User.updateOne(
+    const updatedUser = await User.findOneAndUpdate(
       { _id: req.params.userId },
-      { $set: body }
+      { $set: body }, 
+      {new: true}
     );
-    res.status(200).json(updatedUser);
+    const token = jwt.sign(updatedUser.toJSON(), process.env.TOKEN_SECRET);
+    res.header("auth-token", token);
+    res.status(200).json({
+      body,
+      token,
+    });
   } catch (err) {
     console.log(err);
     if (err == "No results found") {
