@@ -68,7 +68,6 @@ router.post("/:offeringId/accept", async (req, res) => {
 
     res.status(200).json(offering);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -94,7 +93,6 @@ router.post("/:offeringId/rescind", async (req, res) => {
 
     res.status(200).json(offering);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -132,7 +130,6 @@ router.post("/:offeringId/reject", async (req, res) => {
 
     res.status(200).json(offering);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });

@@ -22,7 +22,6 @@ router.get("/findById/:notificationId", async (req, res) => {
     });
     res.status(200).json(notifications);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -36,7 +35,6 @@ router.get("/findByUserId/:userId", async (req, res) => {
     });
     res.status(200).json(notifications);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -62,7 +60,6 @@ router.post("/", async (req, res) => {
     const savedNotification = await notification.save();
     res.status(200).json(savedNotification);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -85,7 +82,6 @@ router.patch("/markAsRead/:notificationId", async (req, res) => {
     );
     res.status(200).json(updatedNotification);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -108,7 +104,6 @@ router.patch("/markAllAsRead/:userId", async (req, res) => {
     );
     res.status(200).json(updatedNotifications);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });

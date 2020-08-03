@@ -28,19 +28,6 @@ const loginValidation = joi.object({
   isGoogleLogin: joi.boolean().required(),
 });
 
-// http://localhost/api/users ///////////////////////////////////////////////////////
-// GET
-// Returns all users
-router.get("/", async (req, res) => {
-  try {
-    const users = await User.find();
-    res.status(200).json(users);
-  } catch (err) {
-    res.status(500).json({
-      message: "Error code 500: Failed to process request",
-    });
-  }
-});
 // POST
 // Creates user based on input parameters
 router.post("/", async (req, res) => {
@@ -59,21 +46,23 @@ router.post("/", async (req, res) => {
       email: reqBody.email,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
   }
 
   if (user) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "This email has already been registered.",
     });
   } else {
-    const location = reqBody.postalCode ? await LocationUtil.getLocationByPostalCode(reqBody.postalCode) : {
-      location: "Central Vancouver | Vancouver, BC",
-      lat: 49.2830972,
-      lon: -123.1175032,
-    };
+    const location = reqBody.postalCode
+      ? await LocationUtil.getLocationByPostalCode(reqBody.postalCode)
+      : {
+          location: "Central Vancouver | Vancouver, BC",
+          lat: 49.2830972,
+          lon: -123.1175032,
+        };
     const user = new User({
       firstName: reqBody.firstName,
       lastName: reqBody.lastName,
@@ -83,7 +72,7 @@ router.post("/", async (req, res) => {
       profilePic: reqBody.profilePic,
       dateRegistered: reqBody.dateRegistered,
       isGoogleUser: reqBody.isGoogleUser,
-      location: location
+      location: location,
     });
 
     try {
@@ -105,7 +94,7 @@ router.post("/", async (req, res) => {
 });
 
 // POST
-// Authenticate user
+// Login user
 router.post("/login", async (req, res) => {
   const reqBody = req.body;
 
@@ -124,13 +113,13 @@ router.post("/login", async (req, res) => {
       email: reqBody.email,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
   }
 
   if (!user && !isGoogleLogin) {
-    res.status(404).json({
+    return res.status(404).json({
       message: "User does not exist.",
     });
   }
@@ -141,10 +130,9 @@ router.post("/login", async (req, res) => {
   );
 
   if (!authenticated && !isGoogleLogin) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "Incorrect user credentials.",
     });
-    return;
   }
 
   const token = jwt.sign(user.toJSON(), process.env.TOKEN_SECRET);
@@ -155,12 +143,14 @@ router.post("/login", async (req, res) => {
   });
 });
 
+// /api/users/authenticate
+// Authenticate user
 router.post("/authenticate", (req, res) => {
   const token = req.body.token;
 
   if (!token) {
     return res.status(401).json({
-      message: "Access denied!",
+      message: "Access denied! Token is unavailable.",
     });
   }
 
@@ -171,12 +161,12 @@ router.post("/authenticate", (req, res) => {
     res.status(200).json(verified);
   } catch (err) {
     res.status(400).json({
-      message: "Invalid Token",
+      message: "Invalid Token provided!",
     });
   }
 });
 
-// http://localhost/api/users/{userId} ////////////////////////////////////////////
+// /api/users/{userId}
 // GET
 router.get("/:userId", async (req, res) => {
   try {
@@ -195,7 +185,7 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
-// http://localhost/api/users/{userId}/offerings/ ////////////////////////////////////////////
+// /api/users/{userId}/offerings/
 // Get all offerings that a user has made
 router.get("/:userId/offerings", async (req, res) => {
   try {
@@ -239,7 +229,8 @@ router.get("/:userId/offerings/inactive", async (req, res) => {
   }
 });
 
-// Get all drilled down details about a postings by the user of the given userId (Use this to get all the offerings pending)
+// Get all drilled down details about a postings by the user of the given userId
+// (Use this to get all the offerings pending)
 router.get("/:userId/postings/complete", async (req, res) => {
   try {
     const postingsOfUser = await Posting.find({
@@ -253,11 +244,9 @@ router.get("/:userId/postings/complete", async (req, res) => {
       location: post.location,
       images: [post.images[0]],
       offerings: post.offerings,
-      ownerId: post.ownerId
+      ownerId: post.ownerId,
     }));
     res.status(200).json(postingPreviews);
-
-    // res.status(200).json(postingsOfUser);
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
@@ -308,7 +297,7 @@ router.get("/:userId/complete", async (req, res) => {
   }
 });
 
-// http://localhost/api/users/{userId}/postings/ ////////////////////////////////////////////
+// /api/users/{userId}/postings/
 // Get all postings that a user has made
 router.get("/:userId/postings", async (req, res) => {
   try {
@@ -336,11 +325,9 @@ router.get("/:userId/postings/active", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
-      ownerId: post.ownerId
+      ownerId: post.ownerId,
     }));
     res.status(200).json(postingPreviews);
-
-    // res.status(200).json(postingsOfUser);
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
@@ -360,11 +347,9 @@ router.get("/:userId/postings/inactive", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
-      ownerId: post.ownerId
+      ownerId: post.ownerId,
     }));
     res.status(200).json(postingPreviews);
-
-    // res.status(200).json(postingsOfUser);
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
@@ -412,7 +397,7 @@ router.patch("/:userId", async (req, res) => {
       );
       body.location = location;
 
-      const postingsToUpdate = await Posting.updateMany(
+      await Posting.updateMany(
         {
           ownerId: req.params.userId,
           active: true,
@@ -425,8 +410,8 @@ router.patch("/:userId", async (req, res) => {
 
     const updatedUser = await User.findOneAndUpdate(
       { _id: req.params.userId },
-      { $set: body }, 
-      {new: true}
+      { $set: body },
+      { new: true }
     );
     const token = jwt.sign(updatedUser.toJSON(), process.env.TOKEN_SECRET);
     res.header("auth-token", token);
