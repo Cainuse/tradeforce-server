@@ -17,6 +17,7 @@ const registerValidation = joi.object({
   email: joi.string().required().email(),
   password: joi.string().required(),
   postalCode: joi.string(),
+  profilePic: joi.string(),
   dateRegistered: joi.date(),
   isGoogleUser: joi.boolean().required(),
 });
@@ -79,6 +80,7 @@ router.post("/", async (req, res) => {
       userName: reqBody.userName,
       email: reqBody.email,
       postalCode: reqBody.postalCode,
+      profilePic: reqBody.profilePic,
       dateRegistered: reqBody.dateRegistered,
       isGoogleUser: reqBody.isGoogleUser,
       location: location
