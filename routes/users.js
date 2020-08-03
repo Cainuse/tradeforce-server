@@ -35,7 +35,6 @@ router.get("/", async (req, res) => {
     const users = await User.find();
     res.status(200).json(users);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -59,7 +58,6 @@ router.post("/", async (req, res) => {
       email: reqBody.email,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -97,7 +95,6 @@ router.post("/", async (req, res) => {
         token,
       });
     } catch (err) {
-      console.log(err);
       res.status(500).json({
         message: "Error code 500: Failed to process request",
       });
@@ -125,7 +122,6 @@ router.post("/login", async (req, res) => {
       email: reqBody.email,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -191,7 +187,6 @@ router.get("/:userId", async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -288,7 +283,6 @@ router.post("/:userId/reviews", async (req, res) => {
 
     res.status(201).json(userToUpdate);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -306,7 +300,6 @@ router.get("/:userId/complete", async (req, res) => {
 
     res.status(201).json(userToUpdate);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -388,7 +381,6 @@ router.get("/findUser/:email", async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -401,7 +393,6 @@ router.delete("/:userId", async (req, res) => {
     const deletedUser = await User.deleteOne({ _id: req.params.userId });
     res.status(204).send();
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -442,7 +433,6 @@ router.patch("/:userId", async (req, res) => {
       token,
     });
   } catch (err) {
-    console.log(err);
     if (err == "No results found") {
       res.status(400).json({
         message: "Error code 400: No results returned by postal code",
