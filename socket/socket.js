@@ -8,7 +8,7 @@ const socketEvents = (io) => {
     // find who the current user has interacted with, extract all those userIds
     // and send them back, indicating all contacts
     socket.on(`chat-list`, async (data) => {
-      if (!data.userId || data.userId == "") {
+      if (!data.userId || data.userId === "") {
         io.emit(`chat-list-response`, {
           error: true,
           message: "User not found",
