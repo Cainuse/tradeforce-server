@@ -190,6 +190,7 @@ const getChatList = async (userId) => {
       ],
     };
     const messages = await Message.find(findCond);
+    const unreadCounts = getUnreadCounts(messages);
     const usersInteractedWith = messages.map((msgObj) => {
       return msgObj.toUserId === userId ? msgObj.fromUserId : msgObj.toUserId;
     });
@@ -200,6 +201,7 @@ const getChatList = async (userId) => {
       if (userInfo.error) {
         throw new Error();
       }
+      userInfo.user._doc.unreadCount = unreadCounts[userInfo.user._id] || 0;
       uniqueChatList.push(userInfo.user);
     }
     return {
@@ -207,6 +209,23 @@ const getChatList = async (userId) => {
       chatList: uniqueChatList,
     };
 };
+
+const getUnreadCounts = (messages) => {
+  const grouped = messages.reduce((result, msg) => {
+    let key = msg.fromUserId;
+    if(!result[key]) {
+      result[key] = [];
+    }
+    result[key].push(msg);
+    return result;
+  }, {});
+  const entries = Object.entries(grouped);
+  const unreadCount = entries.reduce((result, [key, array]) => {
+    result[key] = array.filter(n => n.isUnread).length;
+    return result;
+  }, {});
+  return unreadCount;
+}
 
 const getUserInfo = async (userId) => {
   const user = await User.findOne({ _id: userId }).select(
