@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { boolean } = require("@hapi/joi");
 const Schema = mongoose.Schema;
 
 const ReviewSchema = Schema({

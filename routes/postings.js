@@ -19,6 +19,7 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
 // GET
 // returns a page of active postings
 router.get("/active/:page", async (req, res) => {
@@ -39,7 +40,7 @@ router.get("/active/:page", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
-      ownerId: post.ownerId
+      ownerId: post.ownerId,
     }));
     res.status(200).json({
       numResults: totalResultsCount,
@@ -67,7 +68,7 @@ router.get("/active", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
-      ownerId: post.ownerId
+      ownerId: post.ownerId,
     }));
     res.status(200).json(postingPreviews);
   } catch (err) {
@@ -105,7 +106,7 @@ router.get("/search/:query", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
-      ownerId: post.ownerId
+      ownerId: post.ownerId,
     }));
     res.status(200).json(postingPreviews);
   } catch (err) {
@@ -151,7 +152,7 @@ router.get("/search/:query/:page", async (req, res) => {
       title: post.title,
       location: post.location,
       images: [post.images[0]],
-      ownerId: post.ownerId
+      ownerId: post.ownerId,
     }));
 
     res.status(200).json({
@@ -208,6 +209,7 @@ router.get("/:postingId", async (req, res) => {
     }
     res.status(200).json(posting);
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -220,6 +222,7 @@ router.delete("/:postingId", async (req, res) => {
     await Posting.deleteOne({ _id: req.params.postingId });
     res.status(204).send();
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -235,6 +238,7 @@ router.patch("/:postingId", async (req, res) => {
     );
     res.status(200).json(updatedPosting);
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -251,6 +255,7 @@ router.get("/:postingId/offerings", async (req, res) => {
     });
     res.status(200).json(offeringsOfPosting);
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message: "Error code 500: Failed to process request",
     });
@@ -291,23 +296,6 @@ router.post("/:postingId/offerings", async (req, res) => {
     );
 
     res.status(201).json(offering);
-  } catch (err) {
-    res.status(500).json({
-      message: "Error code 500: Failed to process request",
-    });
-  }
-});
-
-// Internal use only!
-router.get("/showIndex", async (req, res) => {
-  try {
-    Posting.collection
-      .getIndexes({ full: true })
-      .then((indexes) => {
-        console.log("indexes:", indexes);
-        // ...
-      })
-      .catch(console.error);
   } catch (err) {
     console.log(err);
     res.status(500).json({

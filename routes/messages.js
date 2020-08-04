@@ -56,17 +56,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/allMsgs", async (req, res) => {
-  try {
-    const savedMsgs = await Message.find();
-    res.status(200).json(savedMsgs);
-  } catch (err) {
-    res.status(500).json({
-      message: "Error code 500: Failed to process request",
-    });
-  }
-});
-
 router.post("/", async (req, res) => {
   const reqBody = req.body;
 
@@ -89,17 +78,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
-  try {
-    await Message.deleteMany({});
-    res.status(204).send();
-  } catch (err) {
-    res.status(500).json({
-      message: "Error code 500: Failed to process request",
-    });
-  }
-});
-
 router.get("/unread/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -107,11 +85,11 @@ router.get("/unread/:userId", async (req, res) => {
       toUserId: userId,
       isUnread: true,
     });
-    res.status(200).json({unreadCount: totalUnreadCount});
+    res.status(200).json({ unreadCount: totalUnreadCount });
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
-    })
+    });
   }
 });
 
@@ -120,30 +98,36 @@ router.patch("/markAllAsRead", async (req, res) => {
     const fromUserId = req.body.fromUserId;
     const toUserId = req.body.toUserId;
 
-    await Message.updateMany({
-      fromUserId,
-      toUserId,
-      isUnread: true
-    }, {isUnread: false});
+    await Message.updateMany(
+      {
+        fromUserId,
+        toUserId,
+        isUnread: true,
+      },
+      { isUnread: false }
+    );
     res.status(204).send();
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
-    })
+    });
   }
 });
 
 router.patch("/markOneAsRead", async (req, res) => {
   try {
-    await Message.updateOne({
-      _id: req.body.messageId
-    }, {isUnread: false});
+    await Message.updateOne(
+      {
+        _id: req.body.messageId,
+      },
+      { isUnread: false }
+    );
     res.status(204).send();
   } catch (err) {
     res.status(500).json({
       message: "Error code 500: Failed to process request",
-    })
+    });
   }
-})
+});
 
 module.exports = router;

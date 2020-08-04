@@ -51,6 +51,6 @@ const OfferingSchema = Schema({
   },
 });
 
-let model = mongoose.model("Offering", OfferingSchema);
+const model = mongoose.model("Offering", OfferingSchema);
 
 module.exports = model;
